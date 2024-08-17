@@ -18,9 +18,11 @@ function App() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('gameId');
   });
+  const [gameStarted, setGameStarted] = useState(false);
+  const [openStartModal, setOpenStartModal] = useState(true);
 
-  
-  // Determines if user is a host or guest. Checks if user is host and connects them to the API if they are a guest
+
+  // Checks if user is a host and connects them to the API if they are a guest
   useEffect(() => {
     console.log(readyState);
     if (!isHost) {
@@ -28,7 +30,8 @@ function App() {
       let lobbyId = urlParams.get('gameId');
       setGameId(lobbyId);
       setIsConnected(true);
-
+      sendMessageWebsocket("start", lobbyId, "");
+      setOpenStartModal(false);
     } else {
       console.log('Host');
     }
@@ -42,11 +45,6 @@ function App() {
   //   };
 
   //   return () => {
-  //     const urlParams = new URLSearchParams(window.location.search);
-  //     urlParams.delete('gameId');
-  //     setGameId(null);
-  //     window.history.replaceState(null, null, `?${urlParams.toString()}`);
-  //     setIsHost(true);
   //     window.onbeforeunload = null;
   //   };
   // }, []);
@@ -56,7 +54,7 @@ function App() {
 
   const { sendMessage, lastMessage, readyState, getWebSocket } = useWebSocket(socketURL, {
     queryParams: { gameId: gameId },
-    shouldReconnect: () => false,
+    // shouldReconnect: () => false,
     onOpen: () => console.log('Connected'),
     onClose: () => console.log('Disconnected'),
     onError: (error) => console.log('WebSocket Error: ', error),
@@ -66,7 +64,7 @@ function App() {
   /**
    * Handles connecting to the API
    */
-  const handleConnect = () => {
+  const connectWebsocket = () => {
     setIsConnected(true);
   };
 
@@ -74,7 +72,7 @@ function App() {
   /**
    * Handles disconnecting from the API
    */
-  const handleDisconnect = () => {
+  const disconnectWebsocket = () => {
     const socket = getWebSocket();
     if (socket) {
       socket.close();
@@ -86,18 +84,26 @@ function App() {
   /**
    * Handles sending messages to the API
    */
-  const handleMessage = () => {
+  const sendMessageWebsocket = (type, lobbyId, message) => {
     // const message = JSON.stringify({ action: "sendMessage", message: [...initialBoard].reverse() });
-    const message = JSON.stringify({ action: "sendMessage", message: { message: input, roomCode: gameId } });
-    console.log('Sending message:', message);
-    sendMessage(message);
+    const messageObj = JSON.stringify({ action: "sendMessage", message: { message: message, gameId: gameId, type: type } });
+    console.log('Sending message:', messageObj);
+    sendMessage(messageObj);
   };
+
 
   // Handles incoming messages from API
   useEffect(() => {
     if (lastMessage !== null) {
-      console.log('Received message:', typeof (JSON.parse(lastMessage.data)));
-      console.log('Received message:', JSON.parse(lastMessage.data));
+      let message = JSON.parse(lastMessage.data);
+      // console.log('Received message:', typeof (JSON.parse(lastMessage.data)));
+      // console.log('Received message:', JSON.parse(lastMessage.data));
+      console.log(message);
+      if (message.type === 'start') {
+        console.log('Game started');
+        setGameStarted(true);
+        setOpenStartModal(false);
+      }
     }
   }, [lastMessage]);
 
@@ -105,18 +111,18 @@ function App() {
   return (
     <>
       <main className="bg-gray-900 min-h-screen absolute w-full">
-        <StartModal isHost={isHost} setIsHost={setIsHost} setIsConnected={setIsConnected} setGameId={setGameId} />
+        <StartModal openStartModal={openStartModal} connectWebsocket={connectWebsocket} setGameId={setGameId} />
         <div className="max-w-4xl mx-auto">
           <Board board={board} />
 
           <div className="w-full flex items-center justify-center space-x-4">
-            <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-lg font-semibold my-8" onClick={handleConnect} disabled={isConnected}>
+            <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-lg font-semibold my-8" onClick={connectWebsocket} disabled={isConnected}>
               Connect
             </button>
-            <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-lg font-semibold my-8" onClick={handleDisconnect} disabled={!isConnected}>
+            <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-lg font-semibold my-8" onClick={disconnectWebsocket} disabled={!isConnected}>
               Disconnect
             </button>
-            <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-lg font-semibold my-8" onClick={handleMessage} disabled={!isConnected}>
+            <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-lg font-semibold my-8" onClick={() => sendMessageWebsocket("chat", gameId, input)} disabled={!isConnected}>
               Send Message
             </button>
           </div>
