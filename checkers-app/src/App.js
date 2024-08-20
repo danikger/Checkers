@@ -34,7 +34,7 @@ function App() {
       sessionStorage.removeItem('gameId');
       window.location.href = '/';
     } else if (urlGameId) {
-      sessionStorage.setItem('gameId', urlGameId);
+      sessionStorage.setItem('gameId', JSON.stringify(urlGameId));
     }
 
     // Checks if user is a guest and connects them to the API if they are 
