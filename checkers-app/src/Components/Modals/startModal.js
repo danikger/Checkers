@@ -2,7 +2,7 @@ import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/re
 import { HiClipboardList } from "react-icons/hi";
 import { RiLoader5Fill } from "react-icons/ri";
 import { useState, useEffect } from 'react';
-import generateGameId from '../utils/generateGameId';
+import generateGameId from '../../utils/generateGameId';
 
 export default function StartModal({ openStartModal, connectWebsocket, setGameId }) {
   const [startGamePage, setStartGamePage] = useState(1);
@@ -12,14 +12,14 @@ export default function StartModal({ openStartModal, connectWebsocket, setGameId
   useEffect(() => {
     if (startGamePage === 2) {
       const urlParams = new URLSearchParams(window.location.search);
-      let lobbyId = urlParams.get('gameId');
-      if (lobbyId === null) {
-        lobbyId = generateGameId();
-        console.log(lobbyId);
-        urlParams.set('gameId', lobbyId);
+      let urlGameId = urlParams.get('gameId');
+      if (urlGameId === null) {
+        urlGameId = generateGameId();
+        urlParams.set('gameId', urlGameId);
         window.history.replaceState(null, null, `?${urlParams.toString()}`);
-        setGameId(lobbyId);
+        setGameId(urlGameId);
         connectWebsocket();
+        sessionStorage.setItem('gameId', JSON.stringify(urlGameId));
       }
     }
   }, [startGamePage]);

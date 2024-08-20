@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { initialBoard } from './GameLogic/gameLogic.js';
 import useWebSocket from 'react-use-websocket';
 import Board from './Components/board.js';
-import StartModal from './Components/startModal.js';
+import StartModal from './Components/Modals/startModal.js';
+import DisconnectModal from './Components/Modals/disconnectModal.js';
 
 function App() {
   const [board, setBoard] = useState(initialBoard);
@@ -20,34 +21,46 @@ function App() {
   });
   const [gameStarted, setGameStarted] = useState(false);
   const [openStartModal, setOpenStartModal] = useState(true);
+  const [openDisconnectModal, setDisconnectModal] = useState(false);
 
 
-  // Checks if user is a host and connects them to the API if they are a guest
   useEffect(() => {
-    console.log(readyState);
+    // Checks if the user has previously refreshed the page. Sends the user back to the home page if they are trying to reconnect to the same game.
+    const existingGameId = JSON.parse(sessionStorage.getItem('gameId'));
+    const urlParams = new URLSearchParams(window.location.search);
+    let urlGameId = urlParams.get('gameId');
+
+    if (urlGameId && urlGameId === existingGameId) {
+      sessionStorage.removeItem('gameId');
+      window.location.href = '/';
+    } else if (urlGameId) {
+      sessionStorage.setItem('gameId', urlGameId);
+    }
+
+    // Checks if user is a guest and connects them to the API if they are 
     if (!isHost) {
       const urlParams = new URLSearchParams(window.location.search);
-      let lobbyId = urlParams.get('gameId');
-      setGameId(lobbyId);
+      let urlGameId = urlParams.get('gameId');
+      setGameId(urlGameId);
       setIsConnected(true);
-      sendMessageWebsocket("start", lobbyId, "");
+      sendMessageWebsocket("start", urlGameId, "");
       setOpenStartModal(false);
     } else {
       console.log('Host');
     }
-  }, [isHost]);
+  }, []);
 
 
   // Prompts user to confirm page refresh
-  // useEffect(() => {
-  //   window.onbeforeunload = function () {
-  //     return true;
-  //   };
+  useEffect(() => {
+    window.onbeforeunload = function () {
+      return true;
+    };
 
-  //   return () => {
-  //     window.onbeforeunload = null;
-  //   };
-  // }, []);
+    return () => {
+      window.onbeforeunload = null;
+    };
+  }, []);
 
 
   const socketURL = 'wss://k81ymo1nek.execute-api.us-east-1.amazonaws.com/production/';
@@ -86,7 +99,7 @@ function App() {
    */
   const sendMessageWebsocket = (type, lobbyId, message) => {
     // const message = JSON.stringify({ action: "sendMessage", message: [...initialBoard].reverse() });
-    const messageObj = JSON.stringify({ action: "sendMessage", message: { message: message, gameId: gameId, type: type } });
+    const messageObj = JSON.stringify({ action: "sendMessage", message: { message: message, gameId: lobbyId, type: type } });
     console.log('Sending message:', messageObj);
     sendMessage(messageObj);
   };
@@ -104,6 +117,10 @@ function App() {
         setGameStarted(true);
         setOpenStartModal(false);
       }
+      if (message.type === 'disconnect') {
+        console.log('Game disconnected');
+        setDisconnectModal(true);
+      }
     }
   }, [lastMessage]);
 
@@ -112,6 +129,7 @@ function App() {
     <>
       <main className="bg-gray-900 min-h-screen absolute w-full">
         <StartModal openStartModal={openStartModal} connectWebsocket={connectWebsocket} setGameId={setGameId} />
+        <DisconnectModal openDisconnectModal={openDisconnectModal} connectWebsocket={connectWebsocket} setGameId={setGameId} />
         <div className="max-w-4xl mx-auto">
           <Board board={board} />
 
