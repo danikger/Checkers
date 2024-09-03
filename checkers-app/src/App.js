@@ -22,6 +22,8 @@ function App() {
   const [gameStarted, setGameStarted] = useState(false);
   const [openStartModal, setOpenStartModal] = useState(true);
   const [openDisconnectModal, setDisconnectModal] = useState(false);
+  const [currentPlayer, setCurrentPlayer] = useState(2); // Keeps track of whose turn it is. 1: Red's turn, 2: White's turn
+  const [playerRole, setPlayerRole] = useState(2); // Tracks the player's color. 1: Red, 2: White
 
 
   useEffect(() => {
@@ -44,7 +46,10 @@ function App() {
       setGameId(urlGameId);
       setIsConnected(true);
       sendMessageWebsocket("start", urlGameId, "");
+      setGameStarted(true);
       setOpenStartModal(false);
+      setBoard(([...initialBoard].reverse()).map(row => row.reverse()));
+      setPlayerRole(1);
     } else {
       console.log('Host');
     }
@@ -98,7 +103,6 @@ function App() {
    * Handles sending messages to the API
    */
   const sendMessageWebsocket = (type, lobbyId, message) => {
-    // const message = JSON.stringify({ action: "sendMessage", message: [...initialBoard].reverse() });
     const messageObj = JSON.stringify({ action: "sendMessage", message: { message: message, gameId: lobbyId, type: type } });
     console.log('Sending message:', messageObj);
     sendMessage(messageObj);
@@ -121,6 +125,10 @@ function App() {
         console.log('Game disconnected');
         setDisconnectModal(true);
       }
+      if (message.type === 'move') {
+        setBoard((message.message.reverse()).map(row => row.reverse())); // Update the board with the move from the opponent
+        setCurrentPlayer(currentPlayer === 1 ? 2 : 1); // Switch turns
+      }
     }
   }, [lastMessage]);
 
@@ -129,9 +137,9 @@ function App() {
     <>
       <main className="bg-gray-900 min-h-screen absolute w-full">
         <StartModal openStartModal={openStartModal} connectWebsocket={connectWebsocket} setGameId={setGameId} />
-        <DisconnectModal openDisconnectModal={openDisconnectModal} connectWebsocket={connectWebsocket} setGameId={setGameId} />
+        <DisconnectModal openDisconnectModal={openDisconnectModal} />
         <div className="max-w-4xl mx-auto">
-          <Board board={board} />
+          <Board board={board} setBoard={setBoard} gameStarted={gameStarted} currentPlayer={currentPlayer} setCurrentPlayer={setCurrentPlayer} gameId={gameId} sendMessageWebsocket={sendMessageWebsocket} playerRole={playerRole}/>
 
           <div className="w-full flex items-center justify-center space-x-4">
             <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-lg font-semibold my-8" onClick={connectWebsocket} disabled={isConnected}>
