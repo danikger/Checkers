@@ -45,7 +45,7 @@ function App() {
       let urlGameId = urlParams.get('gameId');
       setGameId(urlGameId);
       setIsConnected(true);
-      sendMessageWebsocket("start", urlGameId, "");
+      sendMessageWebsocket("start", urlGameId, ""); // Reason sendMessageWebsocket even takes in a gameId is because gameId state might not be updated by the time this is called 
       setGameStarted(true);
       setOpenStartModal(false);
       setBoard(([...initialBoard].reverse()).map(row => row.reverse()));
@@ -102,7 +102,7 @@ function App() {
   /**
    * Handles sending messages to the API
    */
-  const sendMessageWebsocket = (type, lobbyId, message) => {
+  const sendMessageWebsocket = (type, lobbyId = gameId, message) => {
     const messageObj = JSON.stringify({ action: "sendMessage", message: { message: message, gameId: lobbyId, type: type } });
     console.log('Sending message:', messageObj);
     sendMessage(messageObj);
@@ -112,21 +112,19 @@ function App() {
   // Handles incoming messages from API
   useEffect(() => {
     if (lastMessage !== null) {
-      let message = JSON.parse(lastMessage.data);
-      // console.log('Received message:', typeof (JSON.parse(lastMessage.data)));
-      // console.log('Received message:', JSON.parse(lastMessage.data));
-      console.log(message);
-      if (message.type === 'start') {
+      let receivedMessage = JSON.parse(lastMessage.data);
+      console.log(receivedMessage);
+      if (receivedMessage.type === 'start') {
         console.log('Game started');
         setGameStarted(true);
         setOpenStartModal(false);
       }
-      if (message.type === 'disconnect') {
+      if (receivedMessage.type === 'disconnect') {
         console.log('Game disconnected');
         setDisconnectModal(true);
       }
-      if (message.type === 'move') {
-        setBoard((message.message.reverse()).map(row => row.reverse())); // Update the board with the move from the opponent
+      if (receivedMessage.type === 'move') {
+        setBoard((receivedMessage.message.board.reverse()).map(row => row.reverse())); // Update the board with the move from the opponent
         setCurrentPlayer(currentPlayer === 1 ? 2 : 1); // Switch turns
       }
     }
@@ -139,7 +137,16 @@ function App() {
         <StartModal openStartModal={openStartModal} connectWebsocket={connectWebsocket} setGameId={setGameId} />
         <DisconnectModal openDisconnectModal={openDisconnectModal} />
         <div className="max-w-4xl mx-auto">
-          <Board board={board} setBoard={setBoard} gameStarted={gameStarted} currentPlayer={currentPlayer} setCurrentPlayer={setCurrentPlayer} gameId={gameId} sendMessageWebsocket={sendMessageWebsocket} playerRole={playerRole}/>
+          {/* 🗼 */}
+          <Board
+            board={board}
+            setBoard={setBoard}
+            gameStarted={gameStarted}
+            currentPlayer={currentPlayer}
+            setCurrentPlayer={setCurrentPlayer}
+            sendMessageWebsocket={sendMessageWebsocket}
+            playerRole={playerRole}
+          />
 
           <div className="w-full flex items-center justify-center space-x-4">
             <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-lg font-semibold my-8" onClick={connectWebsocket} disabled={isConnected}>
