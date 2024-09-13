@@ -29,13 +29,8 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, set
   const handleSquareClick = (x, y) => {
     console.log(x, y);
 
-    // Prevent interaction if the game hasn't started or if the clicked square is empty and no piece is selected
-    if (!gameStarted || (board[y][x] === 0 && selectedSquare === null)) return;
-
-    // Ensure that the player can only move their pieces during their turn
-    if (currentPlayer !== playerRole) {
-      return;
-    }
+    // Prevent interaction if the game hasn't started, if the clicked square is empty and no piece is selected, and that the player can only move their pieces during their turn
+    if (!gameStarted || (board[y][x] === 0 && selectedSquare === null) || currentPlayer !== playerRole) return;
 
     // Check if there are any mandatory moves and restrict the player to those moves
     if (mandatoryMoves.length > 0) {
