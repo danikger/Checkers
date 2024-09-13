@@ -1,6 +1,14 @@
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 
-export default function DisconnectModal({ openDisconnectModal }) {
+export default function DisconnectModal({ openDisconnectModal, disconnectType }) {
+
+  function getModalTitle() {
+    return disconnectType === 'opponent' ? 'Opponent Disconnected' : 'Connection Lost';
+  }
+
+  function getModalDescription() {
+    return disconnectType === 'opponent' ? 'Your opponent has disconnected from the game. Please start a new game.' : 'You have lost connection to the game. Please start a new game.';
+  }
 
   return (
     <Dialog open={openDisconnectModal} onClose={() => null} className="relative z-10">
@@ -20,11 +28,11 @@ export default function DisconnectModal({ openDisconnectModal }) {
             <div>
               <div className="text-center">
                 <DialogTitle as="h3" className="text:base sm:text-xl font-semibold leading-6 text-gray-100 inline-flex">
-                  Opponent Disconnected
+                  {getModalTitle()}
                 </DialogTitle>
                 <div className="mt-2">
                   <p className="text-sm text-gray-400">
-                    Your opponent has disconnected from the game. Please start a new game.
+                    {getModalDescription()}
                   </p>
                 </div>
               </div>

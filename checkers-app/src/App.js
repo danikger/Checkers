@@ -20,11 +20,12 @@ function App() {
     return urlParams.get('gameId');
   });
   const [gameStarted, setGameStarted] = useState(false);
-  const [openStartModal, setOpenStartModal] = useState(true);
-  const [openDisconnectModal, setDisconnectModal] = useState(false);
   const [currentPlayer, setCurrentPlayer] = useState(2); // Keeps track of whose turn it is. 1: Red's turn, 2: White's turn
   const [playerRole, setPlayerRole] = useState(2); // Tracks the player's color. 1: Red, 2: White
 
+  const [openStartModal, setOpenStartModal] = useState(true);
+  const [openDisconnectModal, setDisconnectModal] = useState(false);
+  const [disconnectType, setDisconnectType] = useState(''); // Tracks the type of disconnection. 'opponent' or 'self'
 
   useEffect(() => {
     // Checks if the user has previously refreshed the page. Sends the user back to the home page if they are trying to reconnect to the same game.
@@ -74,8 +75,17 @@ function App() {
     queryParams: { gameId: gameId },
     // shouldReconnect: () => false,
     onOpen: () => console.log('Connected'),
-    onClose: () => console.log('Disconnected'),
-    onError: (error) => console.log('WebSocket Error: ', error),
+    onClose: () => {
+      console.log('Disconnected');
+      setIsConnected(false);
+      setDisconnectType('player');
+      setDisconnectModal(true);
+      setGameStarted(false);
+    },
+    onError: (error) => {
+      console.log('WebSocket Error: ', error);
+      setIsConnected(false);
+    },
   }, isConnected);
 
 
@@ -122,6 +132,8 @@ function App() {
       if (receivedMessage.type === 'disconnect') {
         console.log('Game disconnected');
         setDisconnectModal(true);
+        setDisconnectType('opponent');
+        setGameStarted(false);
       }
       if (receivedMessage.type === 'move') {
         setBoard((receivedMessage.message.board.reverse()).map(row => row.reverse())); // Update the board with the move from the opponent
@@ -135,7 +147,7 @@ function App() {
     <>
       <main className="bg-gray-900 min-h-screen absolute w-full">
         <StartModal openStartModal={openStartModal} connectWebsocket={connectWebsocket} setGameId={setGameId} />
-        <DisconnectModal openDisconnectModal={openDisconnectModal} />
+        <DisconnectModal openDisconnectModal={openDisconnectModal} disconnectType={disconnectType} />
         <div className="max-w-4xl mx-auto">
           {/* 🗼 */}
           <Board
