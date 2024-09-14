@@ -111,7 +111,7 @@ export function checkForceJumpsBeforeMove(board, currentPlayer) {
     row.forEach((piece, x) => {
       const playerPieces = currentPlayer === 1 ? [1, 3] : [2, 4];
       if (playerPieces.includes(piece)) {
-        let [newHighlightedSquares, newMandatoryMoves] = checkPieceForJump(board, x, y, piece, currentPlayer);
+        let [newHighlightedSquares, newMandatoryMoves] = checkPieceForJump(board, x, y, currentPlayer);
         highlightedSquares.push(...newHighlightedSquares);
         mandatoryMoves.push(...newMandatoryMoves);
       }
@@ -137,9 +137,7 @@ export function checkForceJumpsAfterCapture(board, x, y, currentPlayer) {
   let mandatoryMoves = [];
   let moveRequired = false;
 
-  const piece = board[y][x];
-
-  [highlightedSquares, mandatoryMoves, moveRequired] = checkPieceForJump(board, x, y, piece, currentPlayer);
+  [highlightedSquares, mandatoryMoves, moveRequired] = checkPieceForJump(board, x, y, currentPlayer);
 
   return [highlightedSquares, mandatoryMoves, moveRequired];
 }
@@ -151,14 +149,16 @@ export function checkForceJumpsAfterCapture(board, x, y, currentPlayer) {
  * @param {number[][]} board - The game board represented as a 2D array.
  * @param {number} x - X coordinate of the piece.
  * @param {number} y - Y coordinate of the piece.
- * @param {number} piece - Piece type.
  * @param {number} currentPlayer - Current player making the move.
- * @returns 
+ * 
+ * @returns {Array} - An array containing the highlighted squares, mandatory moves, and whether a move is required.
  */
-export function checkPieceForJump(board, x, y, piece, currentPlayer) {
+export function checkPieceForJump(board, x, y, currentPlayer) {
   let highlightedSquares = [];
   let mandatoryMoves = [];
   let moveRequired = false;
+  let piece = board[y][x];
+
   // Directions to check: up-left, down-left, top-right, down-right
   const directions = [
     [-1, -1], [-1, 1], [1, -1], [1, 1]
@@ -188,9 +188,3 @@ export function checkPieceForJump(board, x, y, piece, currentPlayer) {
   });
   return [highlightedSquares, mandatoryMoves, moveRequired];
 }
-
-
-/**
- * Checks if there are any mandatory captures for the player.
- * Returns the coordinates of the piece that must be captured, or null if no capture is mandatory.
- */
