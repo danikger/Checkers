@@ -61,11 +61,11 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, set
 
       // Check if the move is valid and perform it
       if (isValidMove(board, startX, startY, x, y, playerRole)) {
-        const [newBoard, moveType] = makeMove(board, startX, startY, x, y, playerRole);
+        const [newBoard, moveType, promotedToKing] = makeMove(board, startX, startY, x, y, playerRole);
         setBoard(newBoard);
 
-        // Check if the player has any force jumps after the capture
-        if (moveType === "capture") {
+        // Check if the player has any force jumps after the capture and that the piece wasn't freshly promoted to a king
+        if (moveType === "capture" && !promotedToKing) {
           const [highlightedSquares, mandatoryMoves, moveRequired] = checkForceJumpsAfterCapture(newBoard, x, y, currentPlayer);
           setHighlightedSquares(highlightedSquares);
           setMandatoryMoves(mandatoryMoves);

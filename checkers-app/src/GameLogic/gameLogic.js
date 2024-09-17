@@ -67,12 +67,13 @@ export function isValidMove(board, startX, startY, endX, endY, player) {
  * @param {number} endY - The ending Y coordinate of the piece.
  * @param {number} player - Player making the move.
  * 
- * @returns {Array} - An array containing the new state of the board and the type of move made.
+ * @returns {Array} - An array containing the new state of the board, the type of move made, and whether the piece was promoted to a king.
  */
 export function makeMove(board, startX, startY, endX, endY, player) {
   const newBoard = board.map(row => [...row]);
-  const piece = newBoard[startY][startX];
   let moveType = "move"; // Two types of moves: "move" or "capture"
+  let promotedToKing = false;
+  const piece = newBoard[startY][startX];
 
   newBoard[endY][endX] = piece;
   newBoard[startY][startX] = 0;
@@ -88,9 +89,11 @@ export function makeMove(board, startX, startY, endX, endY, player) {
   // Promote to king if reaching the last row
   if ((player === 1 && endY === 0) || (player === 2 && endY === 0)) {
     newBoard[endY][endX] = player === 1 ? 3 : 4; // Red king or white king
+    promotedToKing = true; // Helps to stop a piece from capturing on the same turn after it was just promoted
+
   }
 
-  return [newBoard, moveType];
+  return [newBoard, moveType, promotedToKing];
 }
 
 
