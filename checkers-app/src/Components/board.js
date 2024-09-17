@@ -85,7 +85,11 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, set
         setHighlightedSquares([]);
         setMandatoryMoves([]);
       } else {
-        setSelectedSquare(null);
+        if (selectedSquareIsPlayerPiece) {
+          setSelectedSquare([x, y]);
+        } else {
+          setSelectedSquare(null); // Clear selection if the piece doesn't belong to the player
+        }
       }
     } else {
       // Only allow selecting a piece that belongs to the current player
