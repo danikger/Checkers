@@ -1,5 +1,5 @@
 import { FaCrown } from "react-icons/fa";
-import { isValidMove, makeMove, checkForceJumpsBeforeMove, checkForceJumpsAfterCapture } from "../GameLogic/gameLogic";
+import { isValidMove, makeMove, checkForceJumpsBeforeMove, checkForceJumpsAfterCapture, markPossibleMoves } from "../GameLogic/gameLogic";
 import { useEffect, useState } from 'react';
 
 // PIECE VALUES
@@ -13,6 +13,7 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, set
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [highlightedSquares, setHighlightedSquares] = useState([]);
   const [mandatoryMoves, setMandatoryMoves] = useState([]);
+  const [possibleMoves, setPossibleMoves] = useState([]);
 
   // Checks for force jumps before making a move
   useEffect(() => {
@@ -34,6 +35,7 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, set
 
     // Check if there are any mandatory moves and restrict the player to those moves
     if (mandatoryMoves.length > 0) {
+      setPossibleMoves([]); // Clear possible moves
       const selectedMove = [x, y];
       const isMoveValid = mandatoryMoves.some(move =>
         selectedMove.every((value, index) => value === move.from[index]) ||
@@ -41,6 +43,8 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, set
       );
       if (!isMoveValid) return;
     }
+
+    setPossibleMoves(markPossibleMoves(board, x, y, playerRole, mandatoryMoves));
 
     // Handle move if a piece is already selected
     if (selectedSquare) {
@@ -62,11 +66,11 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, set
 
         // Check if the player has any force jumps after the capture
         if (moveType === "capture") {
-          const [highlightedSquares, mandatoryMoves, moveRequired] = checkForceJumpsAfterCapture(board, x, y, currentPlayer);
+          const [highlightedSquares, mandatoryMoves, moveRequired] = checkForceJumpsAfterCapture(newBoard, x, y, currentPlayer);
           setHighlightedSquares(highlightedSquares);
           setMandatoryMoves(mandatoryMoves);
           if (moveRequired) {
-            setSelectedSquare([x, y]);
+            setSelectedSquare(null);
             return;
           }
         }
@@ -104,12 +108,13 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, set
               <div
                 onClick={() => handleSquareClick(colIndex, rowIndex)}
                 key={colIndex}
-                className={`flex justify-center items-center aspect-square ${(rowIndex + colIndex) % 2 === 0 ? 'bg-gray-700' : 'bg-gray-900'} ${square !== 0 ? 'cursor-pointer' : ''}`}
+                className={`flex justify-center items-center aspect-square ${(rowIndex + colIndex) % 2 === 0 ? 'bg-gray-700' : 'bg-gray-900'} ${square !== 0 ? 'cursor-pointer' : ''} 
+                ${possibleMoves.some(([col, row]) => col === colIndex && row === rowIndex) ? 'rounded-full aspect-square border-4 sm:border-8 border-gray-100 border-dotted m-2 sm:m-3 cursor-pointer' : ''}`}
               >
                 {square !== 0 && (
                   <div
                     className={`w-full flex m-2 sm:m-3 rounded-full aspect-square border-4 sm:border-8 
-                      ${(square === 1 || square === 3) ? 'bg-red-500 border-red-700' : 'bg-gray-100 border-gray-300'} 
+                      ${(square === 1 || square === 3) ? 'bg-red-500 border-red-700' : (square === 2 || square === 4) ? 'bg-gray-100 border-gray-300' : ''}
                       ${highlightedSquares.some(([col, row]) => col === colIndex && row === rowIndex) ? 'ring sm:ring-4 ring-yellow-500 ring-offset-4 ring-offset-gray-900' : ''}`}
                   >
                     {(square === 3 || square === 4) && (

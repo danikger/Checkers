@@ -188,3 +188,58 @@ export function checkPieceForJump(board, x, y, currentPlayer) {
   });
   return [highlightedSquares, mandatoryMoves, moveRequired];
 }
+
+/**
+ * Checks for possible moves for a piece at position (x, y) to be shown on the board.
+ * 
+ * @param {number[][]} board - The game board represented as a 2D array.
+ * @param {number} x - X coordinate of the piece.
+ * @param {number} y - Y coordinate of the piece.
+ * @param {number} currentPlayer - Current player making the move.
+ * @param {Array} mandatoryMoves - Array of mandatory move objects. (Example: [{ from: [0, 0], to: [1, 1] }] )
+ * 
+ * @returns {Array} - An array containing the possible moves for the piece.
+ */
+export function markPossibleMoves(board, x, y, currentPlayer, mandatoryMoves) {
+  let possibleMoves = [];
+  const piece = board[y][x];
+
+  // Directions for moving: up-left, up-right, down-left, down-right
+  const directions = [
+    [-1, -1], [-1, 1], [1, -1], [1, 1]
+  ];
+
+  const opponentPieces = currentPlayer === 1 ? [2, 4] : [1, 3];
+
+  if (piece !== 0 && !opponentPieces.includes(piece)) {
+    directions.forEach(([dx, dy]) => {
+      const [newX, newY] = [x + dx, y + dy];
+
+      if ((piece === 1 || piece === 2) && dy === 1) return; // Skip if the piece is a normal piece and checking backwards direction
+
+      // NORMAL MOVE PATH --------
+      // Check if the new position is within bounds and is empty
+      if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && board[newY][newX] === 0) {
+        // Check for mandatory moves and don't show paths for regular moves if there are any
+        if (!mandatoryMoves.length > 0) {
+          possibleMoves.push([newX, newY]);
+        }
+      }
+
+      const [captureX, captureY] = [x + dx, y + dy];
+      const [landX, landY] = [x + 2 * dx, y + 2 * dy];
+
+      // CAPTURE MOVE PATH --------
+      // Check if there's a valid landing spot
+      if (landX >= 0 && landX < 8 && landY >= 0 && landY < 8 && board[landY][landX] === 0) {
+        const middlePiece = board[captureY][captureX];
+        // Check if there's an opponent piece to capture
+        if (opponentPieces.includes(middlePiece)) {
+          possibleMoves.push([landX, landY]);
+        }
+      }
+    });
+  }
+
+  return possibleMoves;
+}
