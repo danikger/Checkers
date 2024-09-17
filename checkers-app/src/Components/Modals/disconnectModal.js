@@ -7,7 +7,7 @@ export default function DisconnectModal({ openDisconnectModal, disconnectType })
   }
 
   function getModalDescription() {
-    return disconnectType === 'opponent' ? 'Your opponent has disconnected from the game. Please start a new game.' : 'You have lost connection to the game. Please start a new game.';
+    return disconnectType === 'opponent' ? 'Your opponent has disconnected from the game.' : 'You have lost connection to the game.';
   }
 
   return (
