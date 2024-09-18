@@ -2,7 +2,7 @@ import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/re
 import { HiClipboardList } from "react-icons/hi";
 import { RiLoader5Fill } from "react-icons/ri";
 import { useState, useEffect } from 'react';
-import generateGameId from '../../utils/generateGameId';
+import { generateGameId } from '../../utils/utilFunctions.js';
 
 export default function StartModal({ openStartModal, connectWebsocket, setGameId }) {
   const [startGamePage, setStartGamePage] = useState(1);
