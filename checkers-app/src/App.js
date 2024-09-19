@@ -5,10 +5,11 @@ import useWebSocket from 'react-use-websocket';
 import Board from './Components/board.js';
 import StartModal from './Components/Modals/startModal.js';
 import DisconnectModal from './Components/Modals/disconnectModal.js';
+import EndModal from './Components/Modals/endModal.js';
+import { flipGameBoard } from './utils/utilFunctions.js';
 
 function App() {
-  const [board, setBoard] = useState(initialBoard);
-  const [input, setInput] = useState('');
+  const [board, setBoard] = useState([...initialBoard]);
   const [isConnected, setIsConnected] = useState(false);
   const [isHost, setIsHost] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -23,9 +24,20 @@ function App() {
   const [currentPlayer, setCurrentPlayer] = useState(2); // Keeps track of whose turn it is. 1: Red's turn, 2: White's turn
   const [playerRole, setPlayerRole] = useState(2); // Tracks the player's color. 1: Red, 2: White
 
+  const [redPieces, setRedPieces] = useState(12); // Tracks red pieces left on the board
+  const [whitePieces, setWhitePieces] = useState(12); // Tracks white pieces left on the board
+
+  const [rematchPending, setRematchPending] = useState(false); // Tracks if a rematch request has been sent
+
+  // MODALS -----------------
   const [openStartModal, setOpenStartModal] = useState(true);
+
   const [openDisconnectModal, setDisconnectModal] = useState(false);
   const [disconnectType, setDisconnectType] = useState(''); // Tracks the type of disconnection. 'opponent' or 'self'
+
+  const [openEndModal, setEndModal] = useState(false);
+  const [endCondition, setEndCondition] = useState(''); // Determines the title displayed in the end modal and handling incoming rematch requests.
+
 
   useEffect(() => {
     // Checks if the user has previously refreshed the page. Sends the user back to the home page if they are trying to reconnect to the same game.
@@ -40,7 +52,7 @@ function App() {
       sessionStorage.setItem('gameId', JSON.stringify(urlGameId));
     }
 
-    // Checks if user is a guest and connects them to the API if they are 
+    // Checks if user is a guest
     if (!isHost) {
       const urlParams = new URLSearchParams(window.location.search);
       let urlGameId = urlParams.get('gameId');
@@ -49,7 +61,7 @@ function App() {
       sendMessageWebsocket("start", urlGameId, ""); // Reason sendMessageWebsocket even takes in a gameId is because gameId state might not be updated by the time this is called 
       setGameStarted(true);
       setOpenStartModal(false);
-      setBoard(([...initialBoard].reverse()).map(row => row.reverse()));
+      setBoard(flipGameBoard(initialBoard));
       setPlayerRole(1);
     } else {
       console.log('Host');
@@ -136,11 +148,76 @@ function App() {
         setGameStarted(false);
       }
       if (receivedMessage.type === 'move') {
-        setBoard((receivedMessage.message.board.reverse()).map(row => row.reverse())); // Update the board with the move from the opponent
+        setBoard(flipGameBoard(receivedMessage.message.board)); // Update the board with the move from the opponent
+        playerRole === 1 ? setRedPieces((prevState) => prevState - receivedMessage.message.piecesCaptured) : setWhitePieces((prevState) => prevState - receivedMessage.message.piecesCaptured);
         setCurrentPlayer(currentPlayer === 1 ? 2 : 1); // Switch turns
+      }
+      if (receivedMessage.type === 'rematch_request') {
+        if (rematchPending) {
+          // Both players agreed to a rematch, reset the game
+          resetGame();
+        } else {
+          // The other player requested a rematch, prompt the current player
+          setEndCondition('rematch_requested');
+          setEndModal(true);
+        }
       }
     }
   }, [lastMessage]);
+
+
+  // Checks if the game has ended. 
+  useEffect(() => {
+    if (redPieces === 0 || whitePieces === 0) {
+      setEndModal(true);
+      const condition = (playerRole === 2 && redPieces === 0) ? 'victory' : 'loss';
+      setEndCondition(condition); //Set the game end condition which determines the title displayed in the end modal and handling rematch requests.
+      setGameStarted(false);
+    }
+  }, [redPieces, whitePieces]);
+
+
+  /**
+   * Handles the move made by the player by taking into account any captured pieces, sending the move to the opponent, and switching turns.
+   * 
+   * @param {number[][]} newBoard - The new game board after the move.
+   * @param {*} capturesCompleted - The number of opponent's pieces captured in the move.
+   */
+  function handleMove(newBoard, capturesCompleted) {
+    playerRole === 1 ? setWhitePieces((prevState) => prevState - capturesCompleted) : setRedPieces((prevState) => prevState - capturesCompleted);
+    sendMessageWebsocket("move", undefined, { board: newBoard, piecesCaptured: capturesCompleted });
+    setCurrentPlayer(currentPlayer === 1 ? 2 : 1); // Switch turns
+  }
+
+
+  /**
+   * Handles the rematch request that comes from the end modal on 'Rematch' and 'Accept' button clicks. If the player 
+   */
+  function handleRematch() {
+    if (endCondition === 'rematch_requested') {
+      // The player was prompted to accept a rematch request and they accepted
+      resetGame();
+    } else {
+      // The player requested a rematch
+      setRematchPending(true);
+    }
+    sendMessageWebsocket("rematch_request", undefined, { rematch: true });
+  }
+
+
+  /**
+   * Resets the game to its initial state. Clears the board, resets the pieces, starts game, closes modal, and sets the current player to white.
+   */
+  function resetGame() {
+    setBoard(!isHost ? flipGameBoard(initialBoard) : initialBoard);
+    setRedPieces(12);
+    setWhitePieces(12);
+    setGameStarted(true);
+    setEndModal(false);
+    setCurrentPlayer(2);
+    setRematchPending(false);
+    setEndCondition('');
+  }
 
 
   return (
@@ -148,16 +225,15 @@ function App() {
       <main className="bg-gray-900 min-h-screen absolute w-full">
         <StartModal openStartModal={openStartModal} connectWebsocket={connectWebsocket} setGameId={setGameId} />
         <DisconnectModal openDisconnectModal={openDisconnectModal} disconnectType={disconnectType} />
+        <EndModal openEndModal={openEndModal} endCondition={endCondition} onRematch={handleRematch} rematchPending={rematchPending} />
         <div className="max-w-4xl mx-auto">
-          {/* 🗼 */}
           <Board
             board={board}
             setBoard={setBoard}
             gameStarted={gameStarted}
             currentPlayer={currentPlayer}
-            setCurrentPlayer={setCurrentPlayer}
-            sendMessageWebsocket={sendMessageWebsocket}
             playerRole={playerRole}
+            onMove={handleMove}
           />
 
           {/* <div className="w-full flex items-center justify-center space-x-4">

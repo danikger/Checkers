@@ -9,11 +9,13 @@ import { useEffect, useState } from 'react';
 // 3: red king
 // 4: white king
 
-export default function Board({ board, setBoard, gameStarted, currentPlayer, setCurrentPlayer, sendMessageWebsocket, playerRole }) {
+export default function Board({ board, setBoard, gameStarted, currentPlayer, playerRole, onMove }) {
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [highlightedSquares, setHighlightedSquares] = useState([]);
   const [mandatoryMoves, setMandatoryMoves] = useState([]);
   const [possibleMoves, setPossibleMoves] = useState([]);
+
+  const [capturesCompleted, setCapturesCompleted] = useState(0);
 
   // Checks for force jumps before making a move
   useEffect(() => {
@@ -48,6 +50,7 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, set
 
     // Handle move if a piece is already selected
     if (selectedSquare) {
+      let capturesThisMove = 0;
       const [startX, startY] = selectedSquare;
 
       // Ensure the selected piece belongs to the current player
@@ -63,6 +66,7 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, set
       if (isValidMove(board, startX, startY, x, y, playerRole)) {
         const [newBoard, moveType, promotedToKing] = makeMove(board, startX, startY, x, y, playerRole);
         setBoard(newBoard);
+        if (moveType === "capture") capturesThisMove++; // Increment captures completed 
 
         // Check if the player has any force jumps after the capture and that the piece wasn't freshly promoted to a king
         if (moveType === "capture" && !promotedToKing) {
@@ -70,18 +74,17 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, set
           setHighlightedSquares(highlightedSquares);
           setMandatoryMoves(mandatoryMoves);
           if (moveRequired) {
+            setCapturesCompleted((prevState) => prevState + 1); // Increment captures completed
             setSelectedSquare(null);
             return;
           }
         }
 
-        const nextPlayer = currentPlayer === 1 ? 2 : 1;
-        // Switch turns and clear the selection
-        setCurrentPlayer(nextPlayer);
         setSelectedSquare(null);
 
         // Send updated board
-        sendMessageWebsocket("move", undefined, { board: newBoard, lastMovedPiece: [Math.abs(x - 7), Math.abs(y - 7)] });
+        onMove(newBoard, capturesThisMove+capturesCompleted);
+        setCapturesCompleted(0);
         setHighlightedSquares([]);
         setMandatoryMoves([]);
       } else {
