@@ -98,30 +98,35 @@ export function makeMove(board, startX, startY, endX, endY, player) {
 
 
 /**
- * Checks if there are any force jumps for the player.
+ * Checks if there are any force jumps for the player, and if there are any normal moves to detect a stalemate.
  * 
  * @param {number[][]} board - Game board represented as a 2D array.
  * @param {number} currentPlayer - Current player making the move.
  * 
- * @returns {Array} - An array containing the highlighted squares and mandatory moves.
+ * @returns {Array} - An array containing the highlighted squares array, mandatory moves array, and a stalemate boolean.
  */
-export function checkForceJumpsBeforeMove(board, currentPlayer) {
+export function getAvailableMoves(board, currentPlayer) {
   let highlightedSquares = [];
   let mandatoryMoves = [];
+  let isStalemate = true;  // Assume stalemate until proven otherwise
 
   // Iterate over the board to find all the current player's pieces
   board.forEach((row, y) => {
     row.forEach((piece, x) => {
       const playerPieces = currentPlayer === 1 ? [1, 3] : [2, 4];
       if (playerPieces.includes(piece)) {
-        let [newHighlightedSquares, newMandatoryMoves] = checkPieceForJump(board, x, y, currentPlayer);
+        let [newHighlightedSquares, newMandatoryMoves, moveRequired, pieceStalemate] = checkPieceForMoves(board, x, y, currentPlayer);
         highlightedSquares.push(...newHighlightedSquares);
         mandatoryMoves.push(...newMandatoryMoves);
+
+        if (!pieceStalemate) {
+          isStalemate = false; // Piece has a move, not a stalemate
+        }
       }
     });
   });
 
-  return [highlightedSquares, mandatoryMoves];
+  return [highlightedSquares, mandatoryMoves, isStalemate];
 }
 
 
@@ -140,26 +145,27 @@ export function checkForceJumpsAfterCapture(board, x, y, currentPlayer) {
   let mandatoryMoves = [];
   let moveRequired = false;
 
-  [highlightedSquares, mandatoryMoves, moveRequired] = checkPieceForJump(board, x, y, currentPlayer);
+  [highlightedSquares, mandatoryMoves, moveRequired] = checkPieceForMoves(board, x, y, currentPlayer);
 
   return [highlightedSquares, mandatoryMoves, moveRequired];
 }
 
 
 /**
- * Checks if the piece at position (x, y) can make a capturing jump.
+ * Checks if the piece at position (x, y) can make a capturing jump as well as a normal move to check for stalemates.
  * 
  * @param {number[][]} board - The game board represented as a 2D array.
  * @param {number} x - X coordinate of the piece.
  * @param {number} y - Y coordinate of the piece.
  * @param {number} currentPlayer - Current player making the move.
  * 
- * @returns {Array} - An array containing the highlighted squares, mandatory moves, and whether a move is required.
+ * @returns {Array} - An array containing the highlighted squares array, mandatory moves array, move required boolean, and a stalemate boolean.
  */
-export function checkPieceForJump(board, x, y, currentPlayer) {
+export function checkPieceForMoves(board, x, y, currentPlayer) {
   let highlightedSquares = [];
   let mandatoryMoves = [];
   let moveRequired = false;
+  let hasNormalMove = false;
   let piece = board[y][x];
 
   // Directions to check: up-left, down-left, top-right, down-right
@@ -180,7 +186,7 @@ export function checkPieceForJump(board, x, y, currentPlayer) {
 
       // Check if there's an opponent piece to capture and an empty landing square
       if (opponentPieces.includes(middlePiece) && landingSquare === 0) {
-        // Kings can move in any direction, regular pieces can only move forward
+        // Check if its a king or a piece moving forward
         if ((piece === 3 || piece === 4) || dy < 0) {
           moveRequired = true;
           highlightedSquares.push([captureX, captureY]);
@@ -188,8 +194,20 @@ export function checkPieceForJump(board, x, y, currentPlayer) {
         }
       }
     }
+
+    // Also check for a normal move in this direction (non-jump)
+    const [newX, newY] = [x + dx, y + dy];
+    if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && board[newY][newX] === 0) {
+      // Check if its a king or a piece moving forward
+      if ((piece === 3 || piece === 4) || dy < 0) {
+        hasNormalMove = true;
+      }
+    }
   });
-  return [highlightedSquares, mandatoryMoves, moveRequired];
+
+  const isStalemate = !moveRequired && !hasNormalMove;
+
+  return [highlightedSquares, mandatoryMoves, moveRequired, isStalemate];
 }
 
 /**

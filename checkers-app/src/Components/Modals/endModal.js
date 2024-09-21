@@ -4,13 +4,28 @@ import { RiLoader5Fill } from "react-icons/ri";
 export default function EndModal({ openEndModal, endCondition, onRematch, rematchPending }) {
 
   function getModalTitle() {
+    if (endCondition === 'rematch_requested') {
+      return 'Opponent requested a rematch'
+    }
+    else if (endCondition === 'victory' || endCondition === 'victory-stalemate') {
+      return 'You Won';
+    }
+    else if (endCondition === 'loss' || endCondition === 'loss-stalemate') {
+      return 'You Lost';
+    }
+    else {
+      return ''; // When a player accepts a rematch, this text flashes for a second
+    }
+  }
+
+  function getModalDescription() {
     switch (endCondition) {
-      case 'rematch_requested':
-        return 'Opponent requested a rematch';
-      case 'victory':
-        return 'You Won';
+      case 'loss-stalemate':
+        return 'You have no remaining moves.';
+      case 'victory-stalemate':
+        return 'Your opponent had no remaining moves.';
       default:
-        return 'You Lost';
+        return '';
     }
   }
 
@@ -36,6 +51,7 @@ export default function EndModal({ openEndModal, endCondition, onRematch, rematc
                 </DialogTitle>
                 <div className="mt-2">
                   <p className="text-sm text-gray-400">
+                    {getModalDescription()}
                   </p>
                 </div>
               </div>

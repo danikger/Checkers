@@ -152,6 +152,11 @@ function App() {
         playerRole === 1 ? setRedPieces((prevState) => prevState - receivedMessage.message.piecesCaptured) : setWhitePieces((prevState) => prevState - receivedMessage.message.piecesCaptured);
         setCurrentPlayer(currentPlayer === 1 ? 2 : 1); // Switch turns
       }
+      if (receivedMessage.type === 'defeat') {
+        setEndModal(true);
+        setEndCondition('victory-stalemate');
+        setGameStarted(false);
+      }
       if (receivedMessage.type === 'rematch_request') {
         if (rematchPending) {
           // Both players agreed to a rematch, reset the game
@@ -181,7 +186,7 @@ function App() {
    * Handles the move made by the player by taking into account any captured pieces, sending the move to the opponent, and switching turns.
    * 
    * @param {number[][]} newBoard - The new game board after the move.
-   * @param {*} capturesCompleted - The number of opponent's pieces captured in the move.
+   * @param {number} capturesCompleted - The number of opponent's pieces captured in the move.
    */
   function handleMove(newBoard, capturesCompleted) {
     playerRole === 1 ? setWhitePieces((prevState) => prevState - capturesCompleted) : setRedPieces((prevState) => prevState - capturesCompleted);
@@ -219,6 +224,16 @@ function App() {
     setEndCondition('');
   }
 
+  /**
+   * Handles the stalemate condition by displaying the end modal and sending a defeat message to the opponent.
+   */
+  function handleStalemate() {
+    setEndModal(true);
+    setEndCondition('loss-stalemate');
+    setGameStarted(false);
+    sendMessageWebsocket("defeat", undefined, "");
+  }
+
 
   return (
     <>
@@ -226,7 +241,7 @@ function App() {
         <StartModal openStartModal={openStartModal} connectWebsocket={connectWebsocket} setGameId={setGameId} />
         <DisconnectModal openDisconnectModal={openDisconnectModal} disconnectType={disconnectType} />
         <EndModal openEndModal={openEndModal} endCondition={endCondition} onRematch={handleRematch} rematchPending={rematchPending} />
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto mt-16">
           <Board
             board={board}
             setBoard={setBoard}
@@ -234,6 +249,7 @@ function App() {
             currentPlayer={currentPlayer}
             playerRole={playerRole}
             onMove={handleMove}
+            onStalemate={handleStalemate}
           />
 
           {/* <div className="w-full flex items-center justify-center space-x-4">

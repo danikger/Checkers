@@ -1,5 +1,5 @@
 import { FaCrown } from "react-icons/fa";
-import { isValidMove, makeMove, checkForceJumpsBeforeMove, checkForceJumpsAfterCapture, markPossibleMoves } from "../GameLogic/gameLogic";
+import { isValidMove, makeMove, getAvailableMoves, checkForceJumpsAfterCapture, markPossibleMoves } from "../GameLogic/gameLogic";
 import { useEffect, useState } from 'react';
 
 // PIECE VALUES
@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 // 3: red king
 // 4: white king
 
-export default function Board({ board, setBoard, gameStarted, currentPlayer, playerRole, onMove }) {
+export default function Board({ board, setBoard, gameStarted, currentPlayer, playerRole, onMove, onStalemate }) {
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [highlightedSquares, setHighlightedSquares] = useState([]);
   const [mandatoryMoves, setMandatoryMoves] = useState([]);
@@ -20,7 +20,11 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, pla
   // Checks for force jumps before making a move
   useEffect(() => {
     if (currentPlayer === playerRole) {
-      const [highlightedSquares, mandatoryMoves] = checkForceJumpsBeforeMove(board, currentPlayer);
+      const [highlightedSquares, mandatoryMoves, isStalemate] = getAvailableMoves(board, currentPlayer);
+      // Current player has no possible moves left, they lose
+      if (isStalemate) {
+        onStalemate();
+      }
       setHighlightedSquares(highlightedSquares);
       setMandatoryMoves(mandatoryMoves);
     }
@@ -108,7 +112,7 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, pla
 
   return (
     <>
-      <div className="grid grid-cols-8 grid-rows-8 mt-32 aspect-square rounded-lg overflow-hidden border-8 border-gray-950">
+      <div className="grid grid-cols-8 grid-rows-8 aspect-square rounded-lg overflow-hidden border-8 border-gray-950">
         {board.map((row, rowIndex) => (
           <>
             {row.map((square, colIndex) => (
