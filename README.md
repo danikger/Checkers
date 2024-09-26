@@ -1,6 +1,6 @@
 # Online Checkers
 
-This is a classic Checkers game where two players can play against each other online in real-time. The frontend is built using React, while the backend uses AWS services such as API Gateway (WebSockets), Lambda, and DynamoDB.
+This is a classic Checkers game where two players can play against each other online in real-time. The frontend is built using React and Tailwind CSS, while the backend uses AWS services such as API Gateway (WebSockets), Lambda, and DynamoDB.
 
 ## Getting Started
 
