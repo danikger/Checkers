@@ -112,7 +112,7 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, pla
 
   return (
     <>
-      <div className="grid grid-cols-8 grid-rows-8 aspect-square rounded-lg overflow-hidden border-8 border-gray-950">
+      <div className="grid grid-cols-8 grid-rows-8 aspect-square rounded-lg overflow-hidden border-4 sm:border-8 border-gray-950">
         {board.map((row, rowIndex) => (
           <>
             {row.map((square, colIndex) => (
@@ -120,13 +120,13 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, pla
                 onClick={() => handleSquareClick(colIndex, rowIndex)}
                 key={colIndex}
                 className={`flex justify-center items-center aspect-square ${(rowIndex + colIndex) % 2 === 0 ? 'bg-gray-700' : 'bg-gray-900'} ${square !== 0 ? 'cursor-pointer' : ''} 
-                ${possibleMoves.some(([col, row]) => col === colIndex && row === rowIndex) ? 'rounded-full aspect-square border-4 sm:border-8 border-gray-100 border-dotted m-2 sm:m-3 cursor-pointer' : ''}`}
+                ${possibleMoves.some(([col, row]) => col === colIndex && row === rowIndex) ? 'rounded-full aspect-square border-4 sm:border-8 border-gray-100 border-dotted m-1.5 sm:m-3 cursor-pointer' : ''}`}
               >
                 {square !== 0 && (
                   <div
                     className={`w-full flex m-1.5 sm:m-3 rounded-full aspect-square border-4 sm:border-8 
                       ${(square === 1 || square === 3) ? 'bg-red-500 border-red-700' : (square === 2 || square === 4) ? 'bg-gray-100 border-gray-300' : ''}
-                      ${highlightedSquares.some(([col, row]) => col === colIndex && row === rowIndex) ? 'ring sm:ring-4 ring-yellow-500 ring-offset-4 ring-offset-gray-900' : ''}`}
+                      ${highlightedSquares.some(([col, row]) => col === colIndex && row === rowIndex) ? 'ring-2 sm:ring-4 ring-yellow-500 ring-offset-2 sm:ring-offset-4 ring-offset-gray-900' : ''}`}
                   >
                     {(square === 3 || square === 4) && (
                       <FaCrown className={`m-auto h-3/5 w-3/5 ${square === 3 ? 'text-red-800' : square === 4 ? 'text-gray-400' : ''
