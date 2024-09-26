@@ -267,19 +267,6 @@ function App() {
             onStalemate={handleStalemate}
           />
           <BottomBar opponentPieces={playerRole === 1 ? whitePieces : redPieces} playerRole={playerRole} onConcede={handleConcede} currentPlayer={currentPlayer}/>
-
-          {/* <div className="w-full flex items-center justify-center space-x-4">
-            <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-lg font-semibold my-8" onClick={connectWebsocket} disabled={isConnected}>
-              Connect
-            </button>
-            <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-lg font-semibold my-8" onClick={disconnectWebsocket} disabled={!isConnected}>
-              Disconnect
-            </button>
-            <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-lg font-semibold my-8" onClick={() => sendMessageWebsocket("chat", gameId, input)} disabled={!isConnected}>
-              Send Message
-            </button>
-          </div>
-          <input type="text" className="border border-gray-700 bg-gray-800 rounded-md shadow-sm text-gray-100" onChange={(e) => setInput(e.target.value)} /> */}
         </div>
       </main>
     </>
