@@ -7,15 +7,19 @@ export default function EndModal({ openEndModal, endCondition, onRematch, rematc
     if (endCondition === 'rematch_requested') {
       return 'Opponent requested a rematch'
     }
-    else if (endCondition === 'victory' || endCondition === 'victory-stalemate') {
+
+    const victoryConditions = ['victory', 'victory-stalemate', 'victory-concede'];
+    const lossConditions = ['loss', 'loss-stalemate', 'loss-concede'];
+
+    if (victoryConditions.includes(endCondition)) {
       return 'You Won';
     }
-    else if (endCondition === 'loss' || endCondition === 'loss-stalemate') {
+    
+    if (lossConditions.includes(endCondition)) {
       return 'You Lost';
     }
-    else {
-      return ''; // When a player accepts a rematch, this text flashes for a second
-    }
+    
+    return ''; // When a player accepts a rematch, this text flashes for a second
   }
 
   function getModalDescription() {
@@ -24,6 +28,10 @@ export default function EndModal({ openEndModal, endCondition, onRematch, rematc
         return 'You have no remaining moves.';
       case 'victory-stalemate':
         return 'Your opponent had no remaining moves.';
+      case 'loss-concede':
+        return 'You conceded the game.';
+      case 'victory-concede':
+        return 'Your opponent conceded the game.';
       default:
         return '';
     }

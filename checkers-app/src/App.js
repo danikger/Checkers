@@ -7,6 +7,8 @@ import StartModal from './Components/Modals/startModal.js';
 import DisconnectModal from './Components/Modals/disconnectModal.js';
 import EndModal from './Components/Modals/endModal.js';
 import { flipGameBoard } from './utils/utilFunctions.js';
+import TopBar from './Components/topBar.js';
+import BottomBar from './Components/bottomBar.js';
 
 function App() {
   const [board, setBoard] = useState([...initialBoard]);
@@ -149,12 +151,12 @@ function App() {
       }
       if (receivedMessage.type === 'move') {
         setBoard(flipGameBoard(receivedMessage.message.board)); // Update the board with the move from the opponent
-        playerRole === 1 ? setRedPieces((prevState) => prevState - receivedMessage.message.piecesCaptured) : setWhitePieces((prevState) => prevState - receivedMessage.message.piecesCaptured);
+        playerRole === 1 ? setRedPieces((prevState) => prevState - receivedMessage.message.piecesCaptured) : setWhitePieces((prevState) => prevState - receivedMessage.message.piecesCaptured); // Set new number of pieces
         setCurrentPlayer(currentPlayer === 1 ? 2 : 1); // Switch turns
       }
       if (receivedMessage.type === 'defeat') {
+        setEndCondition(`victory-${receivedMessage.message.defeatType}`); // Opponent either has a stalemate or conceded
         setEndModal(true);
-        setEndCondition('victory-stalemate');
         setGameStarted(false);
       }
       if (receivedMessage.type === 'rematch_request') {
@@ -171,7 +173,7 @@ function App() {
   }, [lastMessage]);
 
 
-  // Checks if the game has ended. 
+  // Checks number of pieces and ends the game if either player has no pieces left
   useEffect(() => {
     if (redPieces === 0 || whitePieces === 0) {
       setEndModal(true);
@@ -231,7 +233,17 @@ function App() {
     setEndModal(true);
     setEndCondition('loss-stalemate');
     setGameStarted(false);
-    sendMessageWebsocket("defeat", undefined, "");
+    sendMessageWebsocket("defeat", undefined, { defeatType: 'stalemate' });
+  }
+
+  /**
+   * Handles the concede condition by displaying the end modal and sending a defeat message to the opponent.
+   */
+  function handleConcede() {
+    setEndModal(true);
+    setEndCondition('loss-concede');
+    setGameStarted(false);
+    sendMessageWebsocket("defeat", undefined, { defeatType: 'concede' });
   }
 
 
@@ -242,6 +254,7 @@ function App() {
         <DisconnectModal openDisconnectModal={openDisconnectModal} disconnectType={disconnectType} />
         <EndModal openEndModal={openEndModal} endCondition={endCondition} onRematch={handleRematch} rematchPending={rematchPending} />
         <div className="max-w-4xl mx-auto mt-16">
+          <TopBar playerPieces={playerRole === 1 ? redPieces : whitePieces} playerRole={playerRole} currentPlayer={currentPlayer}/>
           <Board
             board={board}
             setBoard={setBoard}
@@ -251,6 +264,7 @@ function App() {
             onMove={handleMove}
             onStalemate={handleStalemate}
           />
+          <BottomBar opponentPieces={playerRole === 1 ? whitePieces : redPieces} playerRole={playerRole} onConcede={handleConcede} currentPlayer={currentPlayer}/>
 
           {/* <div className="w-full flex items-center justify-center space-x-4">
             <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-lg font-semibold my-8" onClick={connectWebsocket} disabled={isConnected}>
