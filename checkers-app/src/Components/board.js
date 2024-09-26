@@ -124,7 +124,7 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, pla
               >
                 {square !== 0 && (
                   <div
-                    className={`w-full flex m-2 sm:m-3 rounded-full aspect-square border-4 sm:border-8 
+                    className={`w-full flex m-1.5 sm:m-3 rounded-full aspect-square border-4 sm:border-8 
                       ${(square === 1 || square === 3) ? 'bg-red-500 border-red-700' : (square === 2 || square === 4) ? 'bg-gray-100 border-gray-300' : ''}
                       ${highlightedSquares.some(([col, row]) => col === colIndex && row === rowIndex) ? 'ring sm:ring-4 ring-yellow-500 ring-offset-4 ring-offset-gray-900' : ''}`}
                   >
