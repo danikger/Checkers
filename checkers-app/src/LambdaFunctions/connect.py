@@ -15,6 +15,10 @@ def lambda_handler(event, context):
     existing_game = response.get('Item')
 
     if existing_game:
+        # Check if guestId already exists. If it does, it means the lobby is full and another player is trying to connect
+        if 'guestId' in existing_game:
+            return {"statusCode": 400, "body": json.dumps({"message": "Game already has the maximum amount of players."})}
+
         # Update the game to include the guestId if it exists
         existing_game['guestId'] = connection_id
         table.put_item(Item=existing_game)
