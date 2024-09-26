@@ -86,8 +86,8 @@ export function makeMove(board, startX, startY, endX, endY, player) {
     moveType = "capture";
   }
 
-  // Promote to king if reaching the last row
-  if ((player === 1 && endY === 0) || (player === 2 && endY === 0)) {
+  // Promote to king if reaching the last row. Doesn't promote if the piece is already a king.
+  if (endY === 0 && piece !== 3 && piece !== 4) {
     newBoard[endY][endX] = player === 1 ? 3 : 4; // Red king or white king
     promotedToKing = true; // Helps to stop a piece from capturing on the same turn after it was just promoted
 
