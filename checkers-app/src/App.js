@@ -230,10 +230,12 @@ function App() {
    * Handles the stalemate condition by displaying the end modal and sending a defeat message to the opponent.
    */
   function handleStalemate() {
-    setEndModal(true);
-    setEndCondition('loss-stalemate');
-    setGameStarted(false);
-    sendMessageWebsocket("defeat", undefined, { defeatType: 'stalemate' });
+    if (redPieces !== 0 && whitePieces !== 0) {
+      setEndModal(true);
+      setEndCondition('loss-stalemate');
+      setGameStarted(false);
+      sendMessageWebsocket("defeat", undefined, { defeatType: 'stalemate' });
+    }
   }
 
   /**
