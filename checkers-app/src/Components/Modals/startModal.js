@@ -56,7 +56,7 @@ export default function StartModal({ openStartModal, connectWebsocket, setGameId
                 </div> */}
             </div>
           </div>
-          <div className="mt-5 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+          <div className="mt-4 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
             <button
               type="button"
               onClick={() => setStartGamePage(2)}
@@ -92,7 +92,7 @@ export default function StartModal({ openStartModal, connectWebsocket, setGameId
             </div>
           </div>
 
-          <div className="w-full mt-5">
+          <div className="w-full mt-4">
             <p className="text-gray-400 mb-1 text-sm">Share link:</p>
             <div className="relative">
               <label htmlFor="game-id-copy-text" className="sr-only">Game Link</label>

@@ -69,7 +69,7 @@ export default function EndModal({ openEndModal, endCondition, onRematch, rematc
               </div>
             </div>
 
-            <div className="mt-5 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+            <div className="mt-4 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
               {
                 endCondition === 'rematch_requested' ? (
                   <>

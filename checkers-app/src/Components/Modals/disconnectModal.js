@@ -38,7 +38,7 @@ export default function DisconnectModal({ openDisconnectModal, disconnectType })
               </div>
             </div>
 
-            <div className="mt-5 ">
+            <div className="mt-4">
               <button
                 type="button"
                 onClick={() => window.location.href = '/'}
