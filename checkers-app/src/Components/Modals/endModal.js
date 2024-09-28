@@ -8,17 +8,17 @@ export default function EndModal({ openEndModal, endCondition, onRematch, rematc
       return 'Opponent requested a rematch'
     }
 
-    const victoryConditions = ['victory', 'victory-stalemate', 'victory-concede'];
-    const lossConditions = ['loss', 'loss-stalemate', 'loss-concede'];
+    const victoryConditions = ['victory', 'victory-stalemate', 'victory-concede', 'victory-timeout'];
+    const lossConditions = ['loss', 'loss-stalemate', 'loss-concede', 'loss-timeout'];
 
     if (victoryConditions.includes(endCondition)) {
       return 'You Won';
     }
-    
+
     if (lossConditions.includes(endCondition)) {
       return 'You Lost';
     }
-    
+
     return ''; // When a player accepts a rematch, this text flashes for a second
   }
 
@@ -32,6 +32,10 @@ export default function EndModal({ openEndModal, endCondition, onRematch, rematc
         return 'You conceded the game.';
       case 'victory-concede':
         return 'Your opponent conceded the game.';
+      case 'loss-timeout':
+        return 'You timed out.';
+      case 'victory-timeout':
+        return 'Your opponent timed out.';
       default:
         return '';
     }

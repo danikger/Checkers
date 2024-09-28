@@ -9,6 +9,7 @@ import EndModal from './Components/Modals/endModal.js';
 import { flipGameBoard } from './utils/utilFunctions.js';
 import TopBar from './Components/topBar.js';
 import BottomBar from './Components/bottomBar.js';
+import useTimer from './utils/useTimer.js';
 
 function App() {
   const [board, setBoard] = useState([...initialBoard]);
@@ -39,6 +40,9 @@ function App() {
 
   const [openEndModal, setEndModal] = useState(false);
   const [endCondition, setEndCondition] = useState(''); // Determines the title displayed in the end modal and handling incoming rematch requests.
+
+  // timeLeft and timerActive in case i want to add a visible timer later :))
+  const { timeLeft, timerActive, setTimerActive } = useTimer(gameStarted, currentPlayer, playerRole, handleTimeout);
 
 
   useEffect(() => {
@@ -191,6 +195,7 @@ function App() {
    * @param {number} capturesCompleted - The number of opponent's pieces captured in the move.
    */
   function handleMove(newBoard, capturesCompleted) {
+    setTimerActive(false); // Stop the timer 
     playerRole === 1 ? setWhitePieces((prevState) => prevState - capturesCompleted) : setRedPieces((prevState) => prevState - capturesCompleted);
     sendMessageWebsocket("move", undefined, { board: newBoard, piecesCaptured: capturesCompleted });
     setCurrentPlayer(currentPlayer === 1 ? 2 : 1); // Switch turns
@@ -249,6 +254,16 @@ function App() {
   }
 
 
+  function handleTimeout() {
+    if (currentPlayer === playerRole) {
+      setEndModal(true);
+      setEndCondition('loss-timeout');
+      setGameStarted(false);
+      sendMessageWebsocket("defeat", undefined, { defeatType: 'timeout' });
+    }
+  };
+
+
   return (
     <>
       <main className="bg-gray-900 min-h-screen absolute w-full">
@@ -256,7 +271,7 @@ function App() {
         <DisconnectModal openDisconnectModal={openDisconnectModal} disconnectType={disconnectType} />
         <EndModal openEndModal={openEndModal} endCondition={endCondition} onRematch={handleRematch} rematchPending={rematchPending} />
         <div className="max-w-4xl mx-auto mt-16">
-          <TopBar playerPieces={playerRole === 1 ? redPieces : whitePieces} playerRole={playerRole} currentPlayer={currentPlayer}/>
+          <TopBar playerPieces={playerRole === 1 ? redPieces : whitePieces} playerRole={playerRole} currentPlayer={currentPlayer} />
           <Board
             board={board}
             setBoard={setBoard}
@@ -266,7 +281,7 @@ function App() {
             onMove={handleMove}
             onStalemate={handleStalemate}
           />
-          <BottomBar opponentPieces={playerRole === 1 ? whitePieces : redPieces} playerRole={playerRole} onConcede={handleConcede} currentPlayer={currentPlayer}/>
+          <BottomBar opponentPieces={playerRole === 1 ? whitePieces : redPieces} playerRole={playerRole} onConcede={handleConcede} currentPlayer={currentPlayer} />
         </div>
       </main>
     </>
