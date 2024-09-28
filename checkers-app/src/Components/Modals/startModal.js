@@ -56,7 +56,7 @@ export default function StartModal({ openStartModal, connectWebsocket, setGameId
                 </div> */}
             </div>
           </div>
-          <div className="mt-4 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+          <div className="mt-4 sm:grid sm:grid-flow-row-dense sm:grid-cols-1 sm:gap-3">
             <button
               type="button"
               onClick={() => setStartGamePage(2)}
@@ -64,13 +64,13 @@ export default function StartModal({ openStartModal, connectWebsocket, setGameId
             >
               Create Game
             </button>
-            <button
+            {/* <button
               type="button"
               // onClick={() => setOpen(false)}
               className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-200 sm:col-start-2 sm:mt-0"
             >
               Find Players
-            </button>
+            </button> */}
           </div>
         </>
       )
