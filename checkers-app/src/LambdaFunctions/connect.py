@@ -11,7 +11,7 @@ def lambda_handler(event, context):
     connection_id = event['requestContext']['connectionId']
 
     # Check if the game already exists
-    response = table.get_item(Key={'gameId': game_id})
+    response = table.get_item(Key={'PK': "game-"+game_id})
     existing_game = response.get('Item')
 
     if existing_game:
@@ -27,7 +27,7 @@ def lambda_handler(event, context):
     else:
         # Create a new game entry with the hostId since it doesn't exist
         new_game = {
-            'gameId': game_id,
+            'PK': "game-"+game_id,
             'hostId': connection_id,
         }
         table.put_item(Item=new_game)

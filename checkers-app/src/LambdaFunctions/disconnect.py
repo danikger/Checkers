@@ -39,7 +39,7 @@ def lambda_handler(event, context):
         
         
             # If the game item exists with this guestId, delete it
-            game_id = response_guest['Items'][0]['gameId']
-            table.delete_item(Key={'gameId': game_id})
+            game_id = response_guest['Items'][0]['PK']
+            table.delete_item(Key={'PK': game_id})
 
             return {'statusCode': 200}

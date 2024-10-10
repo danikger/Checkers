@@ -8,11 +8,11 @@ client = boto3.client('apigatewaymanagementapi', endpoint_url="https://k81ymo1ne
 def lambda_handler(event, context):
     # Extract parameters
     message = json.loads(event['body'])['message']
-    game_id = message['gameId']
     connection_id = event['requestContext']['connectionId']
+    game_id = message['gameId']
 
     # Retrieve the game entry
-    response = table.get_item(Key={'gameId': game_id})
+    response = table.get_item(Key={'PK': "game-"+game_id})
     existing_game = response.get('Item')
     
     receiving_user = None
