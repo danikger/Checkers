@@ -75,16 +75,21 @@ function App() {
   }, []);
 
 
-  // Prompts user to confirm page refresh
+  // Prompts user to confirm page refresh (only if game has started)
   useEffect(() => {
-    window.onbeforeunload = function () {
-      return true;
+    const handleBeforeUnload = (event) => {
+      if (gameStarted) {
+        event.preventDefault();
+        event.returnValue = '';
+      }
     };
 
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
-      window.onbeforeunload = null;
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, []);
+  }, [gameStarted]);
 
 
   const socketURL = 'wss://k81ymo1nek.execute-api.us-east-1.amazonaws.com/production/';
