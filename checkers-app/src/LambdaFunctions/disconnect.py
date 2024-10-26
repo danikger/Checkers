@@ -21,7 +21,7 @@ def lambda_handler(event, context):
         client.post_to_connection(ConnectionId=response_host['Items'][0]['guestId'], Data=json.dumps({'type': 'disconnect', 'message': ''}).encode('utf-8'))
         
         # If the game item exists with this hostId, delete it
-        game_id = response_host['Items'][0]['gameId']
+        game_id = response_host['Items'][0]['PK']
         table.delete_item(Key={'gameId': game_id})
 
         return {'statusCode': 200}
