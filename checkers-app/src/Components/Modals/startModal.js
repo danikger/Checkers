@@ -7,19 +7,28 @@ import UsernamePage from './MatchmakingPages/usernamePage.js';
 import LobbyPage from './MatchmakingPages/lobbyPage.js';
 import InvitationPage from './MatchmakingPages/invitationPage.js';
 
-export default function StartModal({ openStartModal, connectWebsocket, setGameId }) {
+import { MatchmakingProvider } from '../../Context/matchmakingContext.js';
+
+export default function StartModal({ openStartModal, connectWebsocket, disconnectWebsocket, sendMessageWebsocket, lastMessage }) {
   const [startGamePage, setStartGamePage] = useState(1);
-  const [username, setUsername] = useState('');
 
   const modalContents = {
     1: mainPage(),
     2: <GameIdPage />,
-    3: <UsernamePage username={username} setUsername={setUsername} setStartGamePage={setStartGamePage} />,
-    4: <LobbyPage setStartGamePage={setStartGamePage} />,
-    5: <InvitationPage setStartGamePage={setStartGamePage} />
+    3: <UsernamePage setStartGamePage={setStartGamePage} connectWebsocket={connectWebsocket} />,
+    4: <LobbyPage
+      setStartGamePage={setStartGamePage}
+      disconnectWebsocket={disconnectWebsocket}
+      sendMessageWebsocket={sendMessageWebsocket}
+      lastMessage={lastMessage}
+    />,
+    5: <InvitationPage setStartGamePage={setStartGamePage} sendMessageWebsocket={sendMessageWebsocket} />
   };
 
 
+  /**
+   * Generates a new gameId if one is not found in the URL on the link invite page (2nd page).
+   */
   useEffect(() => {
     if (startGamePage === 2) {
       const urlParams = new URLSearchParams(window.location.search);
@@ -28,20 +37,29 @@ export default function StartModal({ openStartModal, connectWebsocket, setGameId
         urlGameId = generateGameId();
         urlParams.set('gameId', urlGameId);
         window.history.replaceState(null, null, `?${urlParams.toString()}`);
-        setGameId(urlGameId);
-        connectWebsocket();
+        connectWebsocket(urlGameId, 'game');
         sessionStorage.setItem('gameId', JSON.stringify(urlGameId));
       }
     }
   }, [startGamePage]);
 
 
+  /**
+   * Renders the contents of the modal based on the state of startGamePage.
+   * @returns {JSX.Element} Modal contents.
+   */
   function renderModalContents() {
     return (
       modalContents[startGamePage]
     )
   }
 
+
+  /**
+   * First and main page of the modal. Players can branch off into creating a new game with an invite link or finding players here.
+   * 
+   * @returns {JSX.Element} Main page of the modal.
+   */
   function mainPage() {
     return (
       <>
@@ -85,7 +103,10 @@ export default function StartModal({ openStartModal, connectWebsocket, setGameId
                       transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 
                       data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full min-[450px]:w-3/4 w-full sm:max-w-md sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95"
           >
-            {renderModalContents()}
+            <MatchmakingProvider>
+
+              {renderModalContents()}
+            </MatchmakingProvider>
           </DialogPanel>
         </div>
       </div>
