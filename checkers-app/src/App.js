@@ -185,6 +185,10 @@ function App() {
             setEndModal(true);
           }
           break;
+
+        case 'invalid-game':
+          window.location.href = '/';
+          break;
       }
     }
   }, [lastMessage]);

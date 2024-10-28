@@ -36,12 +36,24 @@ def lambda_handler(event, context):
 
     # Retrieve the game entry
     response = table.get_item(Key={'PK': "game-"+game_id})
-    existing_game = response.get('Item')
+    existing_game = response.get('Item', [])
     
     receiving_user = None
     
     if data['type'] == 'start':
-        receiving_user = existing_game['hostId']
+        # Check if there is an item for the game, and chack if the user is trying to start an actual game.
+        # For example: user entered random gameId that doesnt exist. Gotta handle that
+        if existing_game:
+            receiving_user = existing_game['hostId']
+
+            # Check if hostId matches connectionId.
+            # If it does match, it means the game that the user is trying to start doesn't exist
+            if existing_game['hostId'] == connection_id:
+                data = {'type': 'invalid-game'}
+        else:
+            # No existing game item, send invalid game message back
+            receiving_user = connection_id
+            data = {'type': 'invalid-game'}
         
     elif data['type'] == 'lobby-invite':
         receiving_user = data['data']['guestData']['hostId']
