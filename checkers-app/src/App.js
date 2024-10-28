@@ -10,18 +10,17 @@ import { flipGameBoard } from './utils/utilFunctions.js';
 import TopBar from './Components/topBar.js';
 import BottomBar from './Components/bottomBar.js';
 import useTimer from './utils/useTimer.js';
+import { getGameIdFromURL } from './utils/utilFunctions.js';
 
 function App() {
   const [board, setBoard] = useState([...initialBoard]);
   const [isConnected, setIsConnected] = useState(false);
   const [isHost, setIsHost] = useState(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    let gameId = urlParams.get('gameId');
+    let gameId = getGameIdFromURL();
     return gameId === null ? true : false;
   });
   const [gameId, setGameId] = useState(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('gameId');
+    return getGameIdFromURL();
   });
   const [gameStarted, setGameStarted] = useState(false);
   const [currentPlayer, setCurrentPlayer] = useState(2); // Keeps track of whose turn it is. 1: Red's turn, 2: White's turn
@@ -50,8 +49,7 @@ function App() {
   useEffect(() => {
     // Checks if the user has previously refreshed the page. Sends the user back to the home page if they are trying to reconnect to the same game.
     const existingGameId = JSON.parse(sessionStorage.getItem('gameId'));
-    const urlParams = new URLSearchParams(window.location.search);
-    let urlGameId = urlParams.get('gameId');
+    let urlGameId = getGameIdFromURL();
 
     if (urlGameId && urlGameId === existingGameId) {
       sessionStorage.removeItem('gameId');
@@ -62,8 +60,6 @@ function App() {
 
     // Checks if user is a guest and sets the appriopriate player role and board state
     if (!isHost) {
-      const urlParams = new URLSearchParams(window.location.search);
-      let urlGameId = urlParams.get('gameId');
       setGameId(urlGameId);
       setIsConnected(true);
       sendMessageWebsocket("start", urlGameId, ""); // Reason sendMessageWebsocket even takes in a gameId is because gameId state might not be updated by the time this is called 
