@@ -17,3 +17,14 @@ export function generateGameId() {
 export function flipGameBoard(board) {
     return [...board].map(row => [...row].reverse()).reverse()
 }
+
+
+/**
+ * Retrieves the gameId from the URL.
+ * 
+ * @returns {string} - The gameId from the URL.
+ */
+export function getGameIdFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('gameId');
+}
