@@ -5,7 +5,7 @@ import { RiLoader5Fill } from "react-icons/ri";
 
 import { useMatchmaking } from '../../../Context/matchmakingContext';
 
-export default function LobbyPage({ setStartGamePage, disconnectWebsocket, sendMessageWebsocket, lastMessage }) {
+export default function LobbyPage({ setStartGamePage, disconnectWebsocket, sendMessageWebsocket, lastMessage, setMatchmakingInProgress }) {
   const { setOpponentData, username, lobbyId, invitePending, setInvitePending } = useMatchmaking();
 
   const [availablePlayers, setAvailablePlayers] = useState([]);
@@ -21,8 +21,8 @@ export default function LobbyPage({ setStartGamePage, disconnectWebsocket, sendM
     try {
       const response = await fetch(apiURL);
       const data = await response.json();
-      const body = JSON.parse(data.body);
-      console.log(body);
+      let body = JSON.parse(data.body);
+      body = body.filter(player => !player.PK.includes(`game-${lobbyId}`));
       setAvailablePlayers(body);
     }
     catch (error) {
@@ -162,7 +162,7 @@ export default function LobbyPage({ setStartGamePage, disconnectWebsocket, sendM
             <div className="relative">
               <div className="flex flex-wrap justify-center items-start gap-2">
                 {availablePlayers.map(player => (
-                  <div onClick={() => handlePlayerInvite(player)} className="flex flex-col items-center justify-center cursor-pointer hover:scale-110 ease-in-out duration-75 delay-75 hover:bg-gray-700 rounded-lg p-1 w-[22%] sm:w-[18%]">
+                  <div key={player.hostId} onClick={() => handlePlayerInvite(player)} className="flex flex-col items-center justify-center cursor-pointer hover:scale-110 ease-in-out duration-75 delay-75 hover:bg-gray-700 rounded-lg p-1 w-[22%] sm:w-[18%]">
                     <span className="aspect-square flex rounded-full h-9 sm:h-12 bg-gray-600 items-center justify-center">
                       <HiUserCircle className="w-full h-full text-gray-800" />
                     </span>
@@ -177,6 +177,7 @@ export default function LobbyPage({ setStartGamePage, disconnectWebsocket, sendM
                 onClick={() => {
                   disconnectWebsocket();
                   setStartGamePage(3);
+                  setMatchmakingInProgress(false);
                 }}
                 className="inline-flex w-full items-center justify-center rounded-md bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >

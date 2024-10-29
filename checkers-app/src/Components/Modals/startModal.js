@@ -9,18 +9,19 @@ import InvitationPage from './MatchmakingPages/invitationPage.js';
 
 import { MatchmakingProvider } from '../../Context/matchmakingContext.js';
 
-export default function StartModal({ openStartModal, connectWebsocket, disconnectWebsocket, sendMessageWebsocket, lastMessage }) {
+export default function StartModal({ openStartModal, connectWebsocket, disconnectWebsocket, sendMessageWebsocket, lastMessage, setMatchmakingInProgress }) {
   const [startGamePage, setStartGamePage] = useState(1);
 
   const modalContents = {
     1: mainPage(),
     2: <GameIdPage />,
-    3: <UsernamePage setStartGamePage={setStartGamePage} connectWebsocket={connectWebsocket} />,
+    3: <UsernamePage setStartGamePage={setStartGamePage} connectWebsocket={connectWebsocket} setMatchmakingInProgress={setMatchmakingInProgress} />,
     4: <LobbyPage
       setStartGamePage={setStartGamePage}
       disconnectWebsocket={disconnectWebsocket}
       sendMessageWebsocket={sendMessageWebsocket}
       lastMessage={lastMessage}
+      setMatchmakingInProgress={setMatchmakingInProgress}
     />,
     5: <InvitationPage setStartGamePage={setStartGamePage} sendMessageWebsocket={sendMessageWebsocket} />
   };
@@ -37,8 +38,10 @@ export default function StartModal({ openStartModal, connectWebsocket, disconnec
         urlGameId = generateGameId();
         urlParams.set('gameId', urlGameId);
         window.history.replaceState(null, null, `?${urlParams.toString()}`);
-        connectWebsocket(urlGameId, 'game');
+        connectWebsocket(urlGameId, 'game', 'You');
         sessionStorage.setItem('gameId', JSON.stringify(urlGameId));
+
+        setMatchmakingInProgress(true);
       }
     }
   }, [startGamePage]);

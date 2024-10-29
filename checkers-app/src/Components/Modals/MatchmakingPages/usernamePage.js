@@ -5,7 +5,7 @@ import { generateGameId } from '../../../utils/utilFunctions';
 
 import { useMatchmaking } from '../../../Context/matchmakingContext';
 
-export default function UsernamePage({ setStartGamePage, connectWebsocket }) {
+export default function UsernamePage({ setStartGamePage, connectWebsocket, setMatchmakingInProgress }) {
   const { username, setUsername, setLobbyId } = useMatchmaking();
   const [error, setError] = useState(false);
 
@@ -23,6 +23,7 @@ export default function UsernamePage({ setStartGamePage, connectWebsocket }) {
       const lobbyId = generateGameId();
       setLobbyId(lobbyId);
       connectWebsocket(lobbyId, 'lobby', cleanedUsername);
+      setMatchmakingInProgress(true);
     }
   };
 

@@ -26,12 +26,14 @@ function App() {
   const [currentPlayer, setCurrentPlayer] = useState(2); // Keeps track of whose turn it is. 1: Red's turn, 2: White's turn
   const [playerRole, setPlayerRole] = useState(2); // Tracks the player's color. 1: Red, 2: White
   const [itemType, setItemType] = useState(''); // Tracks the type of item being sent to the API (game or lobby)
-  const [username, setUsername] = useState(''); // Tracks the player's username
+  const [username, setUsername] = useState('You'); // Tracks the player's username
 
   const [redPieces, setRedPieces] = useState(12); // Tracks red pieces left on the board
   const [whitePieces, setWhitePieces] = useState(12); // Tracks white pieces left on the board
 
   const [rematchPending, setRematchPending] = useState(false); // Tracks if a rematch request has been sent
+
+  const [matchmakingInProgress, setMatchmakingInProgress] = useState(false); // Tracks if the player is currently in the matchmaking process
 
   // MODALS -----------------
   const [openStartModal, setOpenStartModal] = useState(true);
@@ -104,6 +106,9 @@ function App() {
         setDisconnectModal(true);
         setGameStarted(false);
       }
+      if (matchmakingInProgress) {
+        window.location.href = '/';
+      }
     },
     onError: (error) => {
       console.log('WebSocket Error: ', error);
@@ -153,6 +158,7 @@ function App() {
 
       switch (receivedMessage.type) {
         case 'start':
+          setMatchmakingInProgress(false);
           setGameStarted(true);
           setOpenStartModal(false);
           break;
@@ -283,7 +289,14 @@ function App() {
   return (
     <>
       <main className="bg-gray-900 min-h-screen absolute w-full">
-        <StartModal openStartModal={openStartModal} connectWebsocket={connectWebsocket} disconnectWebsocket={disconnectWebsocket} sendMessageWebsocket={sendMessageWebsocket} lastMessage={lastMessage} />
+        <StartModal
+          openStartModal={openStartModal}
+          connectWebsocket={connectWebsocket}
+          disconnectWebsocket={disconnectWebsocket}
+          sendMessageWebsocket={sendMessageWebsocket}
+          lastMessage={lastMessage}
+          setMatchmakingInProgress={setMatchmakingInProgress}
+        />
         <DisconnectModal openDisconnectModal={openDisconnectModal} disconnectType={disconnectType} />
         <EndModal openEndModal={openEndModal} endCondition={endCondition} onRematch={handleRematch} rematchPending={rematchPending} />
         <div className="max-w-4xl mx-auto mt-16">
@@ -297,7 +310,7 @@ function App() {
             onMove={handleMove}
             onStalemate={handleStalemate}
           />
-          <BottomBar opponentPieces={playerRole === 1 ? whitePieces : redPieces} playerRole={playerRole} onConcede={handleConcede} currentPlayer={currentPlayer} />
+          <BottomBar opponentPieces={playerRole === 1 ? whitePieces : redPieces} playerRole={playerRole} onConcede={handleConcede} currentPlayer={currentPlayer} username={username}/>
         </div>
       </main>
     </>
