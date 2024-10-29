@@ -1,6 +1,6 @@
 import { FaCrown } from "react-icons/fa";
 import { isValidMove, makeMove, getAvailableMoves, checkForceJumpsAfterCapture, markPossibleMoves } from "../GameLogic/gameLogic";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 
 // PIECE VALUES
 // 0: empty square
@@ -114,11 +114,11 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, pla
     <>
       <div className="grid grid-cols-8 grid-rows-8 aspect-square rounded-lg overflow-hidden border-4 sm:border-8 border-gray-950">
         {board.map((row, rowIndex) => (
-          <>
+          <Fragment key={rowIndex}>
             {row.map((square, colIndex) => (
               <div
                 onClick={() => handleSquareClick(colIndex, rowIndex)}
-                key={colIndex}
+                key={`${colIndex}-${rowIndex}`}
                 className={`flex justify-center items-center aspect-square ${(rowIndex + colIndex) % 2 === 0 ? 'bg-gray-700' : 'bg-gray-900'} ${square !== 0 ? 'cursor-pointer' : ''} 
                 ${possibleMoves.some(([col, row]) => col === colIndex && row === rowIndex) ? 'rounded-full aspect-square border-4 sm:border-8 border-gray-100 border-dotted m-1.5 sm:m-3 cursor-pointer' : ''}`}
               >
@@ -136,7 +136,7 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, pla
                 )}
               </div>
             ))}
-          </>
+          </Fragment>
         ))}
       </div>
     </>
