@@ -66,6 +66,7 @@ export default function LobbyPage({ setStartGamePage, disconnectWebsocket, sendM
 
         case 'start':
           setInvitePending(false);
+          break;
 
         case 'lobby-invite-declined':
           lobbyInviteDeclined();
