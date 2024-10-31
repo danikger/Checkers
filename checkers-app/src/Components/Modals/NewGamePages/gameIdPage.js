@@ -22,7 +22,7 @@ export default function GameIdPage() {
   return (
     <>
       <div className="text-center">
-        <DialogTitle as="h3" className="text:base sm:text-xl font-semibold leading-6 text-gray-100 inline-flex">
+        <DialogTitle as="h3" className="-ml-2 text:base sm:text-xl font-semibold leading-6 text-gray-100 inline-flex">
           <RiLoader5Fill className="w-6 h-6 text-gray-100 my-auto mr-2 animate-spin rounded-full" />
           Waiting for player...
         </DialogTitle>
@@ -45,6 +45,16 @@ export default function GameIdPage() {
                 <span className="text-xs font-semibold">Copy</span>
               </span>
             )}
+          </button>
+        </div>
+
+        <div className="mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-1 sm:gap-3 w-2/5 mx-auto">
+          <button
+            type="button"
+            onClick={() => window.location.href = '/'}
+            className="inline-flex w-full items-center justify-center rounded-md bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          >
+            Back
           </button>
         </div>
       </div>
