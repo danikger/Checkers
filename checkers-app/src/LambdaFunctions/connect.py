@@ -37,7 +37,7 @@ def lambda_handler(event, context):
             'data': [lobby_data]
         }
         
-        # Let eveyone in the lobby know that a new player has joined
+        # Let everyone in the lobby know that a new player has joined
         for player in players:
             try:
                 client.post_to_connection(ConnectionId=player['hostId'], Data=json.dumps(player_data).encode('utf-8'))
@@ -70,7 +70,7 @@ def lambda_handler(event, context):
         if existing_game:
             # Check if guestId already exists. If it does, it means the lobby is full and another player is trying to connect
             if 'guestId' in existing_game:
-                return {"statusCode": 400, "body": json.dumps({"message": "Game already has the maximum amount of players."})}
+                return {"statusCode": 400, "body": json.dumps({"message": "Game already has the maximum number of players."})}
     
             # Update the game to include the guestId if it exists
             existing_game['guestId'] = connection_id
