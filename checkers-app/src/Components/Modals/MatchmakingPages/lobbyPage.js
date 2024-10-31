@@ -129,7 +129,7 @@ export default function LobbyPage({ setStartGamePage, disconnectWebsocket, sendM
           </div>
 
           <div className="w-full mt-4">
-            <div className="mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-1 sm:gap-3 w-3/5 mx-auto">
+            <div className="mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-1 sm:gap-3 w-2/5 mx-auto">
               <button
                 type="button"
                 onClick={() => {
@@ -172,7 +172,7 @@ export default function LobbyPage({ setStartGamePage, disconnectWebsocket, sendM
                 ))}
               </div>
             </div>
-            <div className="mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-1 sm:gap-3 w-3/5 mx-auto">
+            <div className="mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-1 sm:gap-3 w-2/5 mx-auto">
               <button
                 type="button"
                 onClick={() => {
