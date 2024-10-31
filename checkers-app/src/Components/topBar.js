@@ -1,6 +1,6 @@
 import { HiUserCircle } from "react-icons/hi";
 
-export default function TopBar({ playerPieces, playerRole, currentPlayer }) {
+export default function TopBar({ playerPieces, playerRole, currentPlayer, opponentUsername }) {
   return (
     <>
       <div className="mx-auto flex w-full max-w-7xl items-end justify-between mb-2 lg:px-0 px-4">
@@ -9,7 +9,7 @@ export default function TopBar({ playerPieces, playerRole, currentPlayer }) {
             <span className={`aspect-square flex rounded-full h-9 sm:h-12 bg-gray-600 items-center justify-center ${currentPlayer !== playerRole ? 'ring-2 ring-yellow-500' : ''}`}>
               <HiUserCircle className="w-full h-full text-gray-800" />
             </span>
-            <span className="text-white font-semibold ml-2 sm:text-base text-sm">Opponent</span>
+            <span className="text-white font-semibold ml-2 sm:text-base text-sm">{opponentUsername}</span>
           </div>
         </div>
         {/* TIMER (feels too cluttered with this) */}

@@ -24,22 +24,25 @@ function App() {
   });
   const [gameStarted, setGameStarted] = useState(false);
   const [currentPlayer, setCurrentPlayer] = useState(2); // Keeps track of whose turn it is. 1: Red's turn, 2: White's turn
-  const [playerRole, setPlayerRole] = useState(2); // Tracks the player's color. 1: Red, 2: White
-  const [itemType, setItemType] = useState(''); // Tracks the type of item being sent to the API (game or lobby)
-  const [username, setUsername] = useState('You'); // Tracks the player's username
+  const [playerRole, setPlayerRole] = useState(2); // Controls player's color. 1: Red, 2: White
+  const [itemType, setItemType] = useState(''); // Type of item being sent to the API (game or lobby)
 
-  const [redPieces, setRedPieces] = useState(12); // Tracks red pieces left on the board
-  const [whitePieces, setWhitePieces] = useState(12); // Tracks white pieces left on the board
+  const [username, setUsername] = useState(''); // User's username used to display in matchmaking lobby and for query params for websocket. Updating this with 'setUsername' while connected to websocket will mess up the connection.
+  const [displayUsername, setDisplayUsername] = useState('You'); // User's username. Only used to display on the bottom of the board
+  const [opponentUsername, setOpponentUsername] = useState('Opponent'); // Opponent's username. Only used to display on top of the board
+
+  const [redPieces, setRedPieces] = useState(12); // How many red pieces left on the board
+  const [whitePieces, setWhitePieces] = useState(12); // How many white pieces left on the board
 
   const [rematchPending, setRematchPending] = useState(false); // Tracks if a rematch request has been sent
 
-  const [matchmakingInProgress, setMatchmakingInProgress] = useState(false); // Tracks if the player is currently in the matchmaking process
+  const [matchmakingInProgress, setMatchmakingInProgress] = useState(false); // Helps determine if the user is in the matchmaking process. Used to redirect the user to the home page if they disconnect during matchmaking.
 
   // MODALS -----------------
   const [openStartModal, setOpenStartModal] = useState(true);
 
   const [openDisconnectModal, setDisconnectModal] = useState(false);
-  const [disconnectType, setDisconnectType] = useState(''); // Tracks the type of disconnection. 'opponent' or 'self'
+  const [disconnectType, setDisconnectType] = useState(''); // Type of disconnection. 'opponent' or 'self'
 
   const [openEndModal, setEndModal] = useState(false);
   const [endCondition, setEndCondition] = useState(''); // Determines the title displayed in the end modal and handling incoming rematch requests.
@@ -64,7 +67,7 @@ function App() {
     if (!isHost) {
       setGameId(urlGameId);
       setIsConnected(true);
-      sendMessageWebsocket("start", urlGameId, ""); // Reason sendMessageWebsocket even takes in a gameId is because gameId state might not be updated by the time this is called 
+      sendMessageWebsocket("start", urlGameId, {username: username}); // Reason sendMessageWebsocket even takes in a gameId is because gameId state might not be updated by the time this is called 
       setGameStarted(true);
       setOpenStartModal(false);
       setBoard(flipGameBoard(initialBoard));
@@ -161,6 +164,10 @@ function App() {
           setMatchmakingInProgress(false);
           setGameStarted(true);
           setOpenStartModal(false);
+          if (receivedMessage.hostUsername && receivedMessage.guestUsername) {
+            setOpponentUsername(receivedMessage.guestUsername);
+            setDisplayUsername(receivedMessage.hostUsername);
+          }
           break;
 
         case 'disconnect':
@@ -194,6 +201,13 @@ function App() {
 
         case 'invalid-game':
           window.location.href = '/';
+          break;
+
+        case 'update-usernames':
+          if (receivedMessage.hostUsername && receivedMessage.guestUsername) {
+            setOpponentUsername(receivedMessage.hostUsername);
+            setDisplayUsername(receivedMessage.guestUsername);
+          }
           break;
       }
     }
@@ -300,7 +314,7 @@ function App() {
         <DisconnectModal openDisconnectModal={openDisconnectModal} disconnectType={disconnectType} />
         <EndModal openEndModal={openEndModal} endCondition={endCondition} onRematch={handleRematch} rematchPending={rematchPending} />
         <div className="max-w-4xl mx-auto mt-16">
-          <TopBar playerPieces={playerRole === 1 ? redPieces : whitePieces} playerRole={playerRole} currentPlayer={currentPlayer} />
+          <TopBar playerPieces={playerRole === 1 ? redPieces : whitePieces} playerRole={playerRole} currentPlayer={currentPlayer} opponentUsername={opponentUsername}/>
           <Board
             board={board}
             setBoard={setBoard}
@@ -310,7 +324,7 @@ function App() {
             onMove={handleMove}
             onStalemate={handleStalemate}
           />
-          <BottomBar opponentPieces={playerRole === 1 ? whitePieces : redPieces} playerRole={playerRole} onConcede={handleConcede} currentPlayer={currentPlayer} username={username}/>
+          <BottomBar opponentPieces={playerRole === 1 ? whitePieces : redPieces} playerRole={playerRole} onConcede={handleConcede} currentPlayer={currentPlayer} username={displayUsername}/>
         </div>
       </main>
     </>

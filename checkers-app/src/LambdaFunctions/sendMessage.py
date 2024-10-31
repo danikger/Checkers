@@ -45,6 +45,9 @@ def lambda_handler(event, context):
         # For example: user entered random gameId that doesnt exist. Gotta handle that
         if existing_game:
             receiving_user = existing_game['hostId']
+            data = {'type': 'start', 'hostUsername': existing_game['hostUsername'], 'guestUsername': existing_game['guestUsername']}
+
+            send_to_connection(connection_id, {'type': 'update-usernames', 'hostUsername': existing_game['hostUsername'], 'guestUsername': existing_game['guestUsername']})
 
             # Check if hostId matches connectionId.
             # If it does match, it means the game that the user is trying to start doesn't exist
@@ -93,23 +96,24 @@ def lambda_handler(event, context):
     elif data['type'] == 'lobby-invite-accepted':
         # Remove guest item from DB and overwrite host item with hostId and guestId
 
-        receiving_user = data['data']['hostId']
-        data = {
-            'type': 'start'
-        }
+        receiving_user = data['data']['hostData']['hostId']
         
         # Delete guest DB item
         remove_player_from_lobby(connection_id)
         
         # Overwrite the host item with hostId and guestId (this will be the item used for managing the game)
         game_data = {
-            'PK': "game-"+game_id,
+            'PK': data['data']['hostData']['PK'],
             'hostId': receiving_user,
-            'guestId': connection_id,
-            'username': username,
+            'hostUsername': data['data']['hostData']['username'],
+            'guestUsername': data['data']['guestData']['username'],
             'itemType': 'game'
         }
         table.put_item(Item=game_data)
+
+        data = {
+            'type': 'start'
+        }
         
     elif data['type'] == 'lobby-invite-declined':
         receiving_user = data['data']['hostId']

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { HiUserCircle } from "react-icons/hi";
 
-export default function BottomBar({opponentPieces, playerRole, onConcede, currentPlayer}) {
+export default function BottomBar({ opponentPieces, playerRole, onConcede, currentPlayer, username }) {
 
   return (
     <>
@@ -11,7 +11,7 @@ export default function BottomBar({opponentPieces, playerRole, onConcede, curren
             <span className={`aspect-square flex rounded-full h-9 sm:h-12 bg-gray-600 items-center justify-center ${currentPlayer === playerRole ? 'ring-2 ring-yellow-500' : ''}`}>
               <HiUserCircle className="w-full h-full text-gray-800" />
             </span>
-            <span className="text-white font-semibold ml-2 sm:text-base text-sm">You</span>
+            <span className="text-white font-semibold ml-2 sm:text-base text-sm">{username}</span>
           </div>
         </div>
         <button className="flex bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold text-center sm:text-sm text-xs" onClick={onConcede}>Concede</button>

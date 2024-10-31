@@ -2,11 +2,11 @@ import { DialogTitle } from '@headlessui/react';
 import { useMatchmaking } from '../../../Context/matchmakingContext';
 
 export default function InvitationPage({ setStartGamePage, sendMessageWebsocket }) {
-  const { opponentData, setInvitePending } = useMatchmaking();
+  const { opponentData, setInvitePending, username } = useMatchmaking();
   console.log(opponentData);
 
   function handleAccept() {
-    sendMessageWebsocket("lobby-invite-accepted", undefined, opponentData);
+    sendMessageWebsocket("lobby-invite-accepted", undefined, {hostData: opponentData, guestData: {username: username}});
     let PK = opponentData.PK;
     let gameId = PK.split("-")[1];
     window.location.href = `/?gameId=${gameId}`;
