@@ -11,8 +11,31 @@ def notify_lobby(message):
         KeyConditionExpression='itemType = :itemType',
         ExpressionAttributeValues={':itemType': 'lobby'}
     )
-    for player in response.get('Items', []):
-        send_to_connection(player['hostId'], message)
+    players = response.get('Items', [])
+
+    for player in players:
+            try:
+                send_to_connection(player['hostId'], message)
+            except Exception as e:
+                # Since $disconnect is "best effort", we need to handle the case where a player connection is no longer valid
+                if 'GoneException' in str(e):
+                    # Log issue
+                    print(f"Connection {player['hostId']} is no longer valid.")
+
+                    # Get player item
+                    response = table.query(
+                        IndexName='host-index',
+                        KeyConditionExpression='hostId = :id',
+                        ExpressionAttributeValues={':id': player['hostId']}
+                    )
+
+                    # Remove the player item
+                    if 'Items' in response and response['Items']:
+                        pk = response['Items'][0]['PK']
+                        table.delete_item(Key={'PK': pk})
+                else:
+                    # Other errors
+                    raise
 
 def send_to_connection(connection_id, message_data):
     client.post_to_connection(ConnectionId=connection_id, Data=json.dumps(message_data).encode('utf-8'))
