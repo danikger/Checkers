@@ -72,8 +72,6 @@ function App() {
       setOpenStartModal(false);
       setBoard(flipGameBoard(initialBoard));
       setPlayerRole(1);
-    } else {
-      console.log('Host');
     }
   }, []);
 
@@ -100,9 +98,11 @@ function App() {
   const { sendMessage, lastMessage, readyState, getWebSocket } = useWebSocket(socketURL, {
     queryParams: { gameId: gameId, itemType: itemType, username: username },
     // shouldReconnect: () => false,
-    onOpen: () => console.log('Connected'),
+    onOpen: () => {
+      // console.log('Connected')
+    },
     onClose: () => {
-      console.log('Disconnected');
+      // console.log('Disconnected');
       if (gameStarted) {
         setIsConnected(false);
         setDisconnectType('player');
@@ -148,7 +148,6 @@ function App() {
    */
   const sendMessageWebsocket = (type, lobbyId = gameId, message) => {
     const messageObj = JSON.stringify({ action: "sendMessage", data: { data: message, gameId: lobbyId, type: type } });
-    console.log('Sending message:', messageObj);
     sendMessage(messageObj);
   };
 
@@ -157,7 +156,6 @@ function App() {
   useEffect(() => {
     if (lastMessage !== null) {
       let receivedMessage = JSON.parse(lastMessage.data);
-      console.log(receivedMessage);
 
       switch (receivedMessage.type) {
         case 'start':

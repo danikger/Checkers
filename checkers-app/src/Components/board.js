@@ -34,8 +34,6 @@ export default function Board({ board, setBoard, gameStarted, currentPlayer, pla
    * Handles selecting a piece or making a move on the board.
    */
   const handleSquareClick = (x, y) => {
-    console.log(x, y);
-
     // Prevent interaction if the game hasn't started, if the clicked square is empty and no piece is selected, and that the player can only move their pieces during their turn
     if (!gameStarted || (board[y][x] === 0 && selectedSquare === null) || currentPlayer !== playerRole) return;
 

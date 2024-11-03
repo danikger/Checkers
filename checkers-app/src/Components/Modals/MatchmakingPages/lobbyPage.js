@@ -81,11 +81,10 @@ export default function LobbyPage({ setStartGamePage, disconnectWebsocket, sendM
 
 
   /**
-   * 
-   * @param {*} playerData 
+   * Sends an invite to the selected player and updates the URL with the gameId.
+   * @param {*} playerData Data of player to invite.
    */
   function handlePlayerInvite(playerData) {
-    console.log(playerData);
     setInvitePending(true);
     setGuestData(playerData);
 
@@ -99,7 +98,7 @@ export default function LobbyPage({ setStartGamePage, disconnectWebsocket, sendM
 
 
   /**
-   * 
+   * Handles the case where the invite was declined by the invited player. Removes the gameId from the URL and sessionStorage.
    */
   function lobbyInviteDeclined() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -114,7 +113,7 @@ export default function LobbyPage({ setStartGamePage, disconnectWebsocket, sendM
 
 
   /**
-   * 
+   * Shows the modal content based on the state of invitePending. If invitePending is true, the modal will show the "Waiting for response" message.
    * @returns {JSX.Element} Modal content for invite pending.
    */
   function getModalContent() {

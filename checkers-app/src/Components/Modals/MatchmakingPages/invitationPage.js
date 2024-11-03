@@ -3,7 +3,6 @@ import { useMatchmaking } from '../../../Context/matchmakingContext';
 
 export default function InvitationPage({ setStartGamePage, sendMessageWebsocket }) {
   const { opponentData, setInvitePending, username } = useMatchmaking();
-  console.log(opponentData);
 
   function handleAccept() {
     sendMessageWebsocket("lobby-invite-accepted", undefined, {hostData: opponentData, guestData: {username: username}});
