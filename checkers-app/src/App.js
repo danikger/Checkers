@@ -218,8 +218,11 @@ function App() {
   useEffect(() => {
     if (redPieces === 0 || whitePieces === 0) {
       setEndModal(true);
-      const condition = (playerRole === 2 && redPieces === 0) ? 'victory' : 'loss';
-      setEndCondition(condition); //Set the game end condition which determines the title displayed in the end modal and handling rematch requests.
+      if ((playerRole === 1 && whitePieces === 0) || (playerRole === 2 && redPieces === 0)) {
+        setEndCondition('victory');
+      } else {
+        setEndCondition('loss');
+      }
       setGameStarted(false);
     }
   }, [redPieces, whitePieces]);
