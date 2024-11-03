@@ -16,6 +16,8 @@ export default function UsernamePage({ setStartGamePage, connectWebsocket, setMa
 
     if (cleanedUsername.length < 1) {
       setError('Required');
+    } else if (cleanedUsername.length > 7) {
+      setError('Username must be 7 characters or less');
     } else {
       setError('');
       setUsername(cleanedUsername);
