@@ -4,7 +4,7 @@ This is a classic Checkers game where two players can play against each other on
 
 This app also includes a matchmaking feature that allows players to join a lobby, browse connected users, and send or receive game invites to play against others online.
 
-Play [here](https://checkers-pi-ashen.vercel.app/)
+### Play [here](https://checkers-pi-ashen.vercel.app/)
 
 ## Getting Started
 
