@@ -314,7 +314,7 @@ function App() {
         />
         <DisconnectModal openDisconnectModal={openDisconnectModal} disconnectType={disconnectType} />
         <EndModal openEndModal={openEndModal} endCondition={endCondition} onRematch={handleRematch} rematchPending={rematchPending} />
-        <div className="max-w-4xl mx-auto mt-16">
+        <div className="max-w-screen-md mx-auto mt-16">
           <TopBar playerPieces={playerRole === 1 ? redPieces : whitePieces} playerRole={playerRole} currentPlayer={currentPlayer} opponentUsername={opponentUsername}/>
           <Board
             board={board}
